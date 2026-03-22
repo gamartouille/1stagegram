@@ -1,0 +1,28 @@
+{
+  "name": "1stagegram",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/gamartouille/1stagegram#readme",
+  "bugs": {
+    "url": "https://github.com/gamartouille/1stagegram/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gamartouille/1stagegram.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "stage.js",
+  "scripts": {
+    "dev": "vite",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "supabase": "^2.83.0",
+    "vite": "^8.0.1"
+  },
+  "dependencies": {
+    "dotenv": "^17.3.1"
+  }
+}
