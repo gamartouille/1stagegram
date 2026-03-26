@@ -1,13 +1,23 @@
 # Développement d'un plugin cartographique pour le logiciel Apache Superset
-_(juste en dessous des badges sympatiques à placer)_
 
-[![forthebadge](http://forthebadge.com/images/badges/built-with-love.svg)](http://forthebadge.com)  [![forthebadge](http://forthebadge.com/images/badges/powered-by-electricity.svg)](http://forthebadge.com)
+## Contexte et Objectifs
 
-Exploration pour l'entreprise 1Spatial des possibilités de représentations cartographiques de données dans le logiciel Apache Superset.
+### Le commanditaire
 
-## Apache Superset
+1Spatial est une entreprise ayant pour mission d’accompagner ses clients dans la gestion de leurs donn´ees
+g´eolocalis´ees. Elle propose un ensemble de solutions logicielles et de services d’accompagnement personnalis´e
+adapt´es selon les besoins. 1Spatial travaille avec des acteurs de multiples milieux (collectivit´es territoriales,
+gouvernement, r´eseaux d’utilit´e publique, transport et infrastructure, etc). Leur rˆole est de simplifier pour
+un public non-sp´ecialiste la lecture de donn´ees statistiques et g´eographiques pour mener leurs clients vers
+une prise de d´ecision robuste et fiable.
+
+### Apache Superset
 
 Logiciel de visualisation de données "no code" permettant de représenter la data sous différents formats (heatmap, histogramme, camembert, diagramme de Gantt). La force de Superset réside dans ses Tableaux de bord qui condense dans un affichage ergonomique l'ensemble des graphiques produits sur le(s) jeu(x) de données. 
+
+### Attentes
+
+Explorer les possiblités cartographiques du logiciel en développant un plugin externe de visualisation cartographique. L'objectif principal est d'établir s'il est possible d'harmoniser les visualisations graphiques (histogrammes, camembert, heatmap, etc) avec les visualisations cartos. Si l'utilisateur bouge l'emprise de la carte sur la visualisation carto, alors les graphiques se mettent à jour en fonction des données visibles. 
 
 ## Processus de développement
 
@@ -25,30 +35,25 @@ Nous avons essayé plusieurs manières de configurer le logiciel en mode éditab
 
 Les bibliothèques que l'on a dû installer pour installer Superset et développer le plugin sont les suivantes :
 
-* Node.js 
+* Node.js - version 20.20.1
+* npm - version 10.8.2
+* Yeoman - version 8.1.2
+* Yo - version 7.0.0
+* Apache Superset - version 6.0.0
 
 ### Code
 
 Les étapes pour installer votre programme....
 
-Dites ce qu'il faut faire...
-
-_exemple_: Executez la commande ``telnet mapscii.me`` pour commencer ensuite [...]
-
-
-Ensuite vous pouvez montrer ce que vous obtenez au final...
 
 ## Déploiement
 
+### Format des données en entrée
+
+Le logiciel Apache Superset ne lit que des fichiers au format Geojson. Les données géographiques utilisées peuvent être en latitude longitude ou en Lambert93 (x,y). Le logiciel détecte automatiquement la manière dont les données doivent être chargées sur la carte.
+Nous avons travaillé avec une BDD fournie par notre commanditaire 1Spatial.
 
 
-installation qu'on a faites : 
-
-Node.Js version 20.20.1
-NPM version 10.8.2
-yeoman-generator version 8.1.2
-yo version 7.0.0
-Apache Superset version 6.0.0
 
 
 format des données avec lesquelles on a travaillé : 
