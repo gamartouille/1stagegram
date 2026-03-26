@@ -1,9 +1,12 @@
-require('dotenv').config();
-const { createClient } = require('@supabase/supabase-js');
+import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_KEY;
+const supabaseUrl = 'https://komsplwinybifzsmjecu.supabase.co';
+const supabaseAnonKey = 'sb_publishable_RjquiQjx5rJ1Xj-fp4ou1g_aKmy9Iia';
 
-const supabase = createClient(supabaseUrl, supabaseKey);
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.warn('Supabase: VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY not set');
+}
 
-module.exports = supabase;
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+export default supabase;
