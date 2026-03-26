@@ -23,13 +23,13 @@ Explorer les possiblités cartographiques du logiciel en développant un plugin 
 
 ### Configuration de l'environnement
 
-Nous avons essayé plusieurs manières de configurer le logiciel en mode éditable (le mode dédie au développement de plugins externes), une n'a pas fonctionné (installation via un environnement virtuel Python), et une a fonctionné (installation via un docker).
+Nous avons essayé plusieurs manières de configurer le logiciel en mode éditable (le mode dédie au développement de plugins externes), une n'a pas fonctionné (installation via un environnement virtuel Python), et une a fonctionné (installation via un docker). Les étapes de configuration que nous avons suivies sont les suivantes :
 
---> git clone du github superset
---> dossier à part: génération de l'architecture avec yeoman
---> dans le frontend du git superset tu appelles le plugin dans le main-preset
---> puis tu link via les outils git
---> tu relances le docker de l'application qui ouvre Superset avec le plugin intégré
+* Clonage du [Github](https://github.com/apache/superset) de Apache Superset
+* Construction de l'architecture du plugin via le générateur Yeoman
+* Appel du plugin dans le preset du frontend de Superset
+* Lien du plugin via les outils Github
+* Lancement de Superset via Docker avec le plugin intégré
 
 ### Installation des bilbiothèques nécessaires
 
@@ -43,27 +43,16 @@ Les bibliothèques que l'on a dû installer pour installer Superset et développ
 
 ### Code
 
-Les étapes pour installer votre programme....
-
+Utilisation de la bibliothèque Leaflet pour JavaScript pour l'intégration d'un fond de carte au logiciel, ainsi que de figurés représentant les données en entrée. Le fichier en annexe contient le code du contenu du plugin. 
 
 ## Déploiement
 
 ### Format des données en entrée
 
 Le logiciel Apache Superset ne lit que des fichiers au format Geojson. Les données géographiques utilisées peuvent être en latitude longitude ou en Lambert93 (x,y). Le logiciel détecte automatiquement la manière dont les données doivent être chargées sur la carte.
-Nous avons travaillé avec une BDD fournie par notre commanditaire 1Spatial.
+Nous avons travaillé avec une BDD fournie par notre commanditaire 1Spatial. Il n'y avait que des figurés ponctuels, chaque point représentant un "évènement" sur les routes. Ce sont des données issues de la Direction Iinterdépartementales des Routes Centre-Est qui étudie l'état des routes de la région.
 
+### Ouverture du plugin
 
-
-
-format des données avec lesquelles on a travaillé : 
-
-coordonnées en x,y en Lambert93
-latitude longitude
-
-format des données en entrée :
-
-test OK avec Geojson
-
-données= données d'évenèneen ts sir les routes avec des tavkettes
+Déploiement d'une image docker contenant la bonne installation de Superset ainsi que le plugin intégré au frontend. 
 
