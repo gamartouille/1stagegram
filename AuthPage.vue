@@ -247,16 +247,29 @@ async function handleLogin() {
     }
 
     // Succès : sauvegarder et rediriger
+  const { error: updateError } = await supabase
+      .from('sessions')
+      .update({ nbr_connexion: data.nbr_connexion + 1 })
+      .eq('pseudo', pseudo)
+
+    if (updateError) throw updateError
+
+    console.log('nbr_connexion après update :', data.nbr_connexion + 1)
+
     localStorage.setItem('nick', pseudo)
     localStorage.setItem('playerCode', data.code)
     localStorage.setItem('playerId', data.id)
+    localStorage.setItem('nbrConnexion', data.nbr_connexion + 1)
 
-    router.push({ name: 'Information', query: { nick: pseudo } })
-  } catch (err) {
-    error.value = 'Erreur : ' + (err.message || String(err))
-  } finally {
-    loading.value = false
-  }
+    if (data.nbr_connexion === 0) {  // ← 0 car c'est la 1ère connexion (avant l'update)
+      router.push({ name: 'Information', query: { nick: pseudo } })
+    } else {
+      router.push({ name: 'Accueil' })
+    }} catch (err) {
+      error.value = 'Erreur : ' + (err.message || String(err))
+    } finally {
+      loading.value = false
+    }
 }
 
 function closeSuccessModal() {

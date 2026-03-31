@@ -1,0 +1,88 @@
+<template>
+  <div class="accueil-button">
+    <router-link :to="{ name: 'Accueil' }">
+      <button>Accueil</button>
+    </router-link>
+  </div>
+  <div id="map" style="width: 100%; height: 100vh;"></div>
+</template>
+
+<script>
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  'https://komsplwinybifzsmjecu.supabase.co',
+  'sb_publishable_RjquiQjx5rJ1Xj-fp4ou1g_aKmy9Iia'
+);
+
+export default {
+  async mounted() {
+    // Configuration des icônes Leaflet par défaut
+    delete L.Icon.Default.prototype._getIconUrl;
+    L.Icon.Default.mergeOptions({
+      iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+      iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+      shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+    });
+
+    const map = L.map("map").setView([46.603354, 1.888334], 6); // Centré sur la France
+
+    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+      attribution:
+        '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    }).addTo(map);
+
+    // Récupération des villes et pseudos depuis Supabase
+    const { data, error } = await supabase
+      .from("sessions")
+      .select("ville, pseudo")
+      .not("ville", "is", null);
+
+    if (error) {
+      console.error("Erreur Supabase :", error);
+      return;
+    }
+
+    // Grouper par ville et collecter les pseudos
+    const villesMap = {};
+    data.forEach((row) => {
+      if (!villesMap[row.ville]) {
+        villesMap[row.ville] = [];
+      }
+      villesMap[row.ville].push(row.pseudo);
+    });
+
+    // Géocodage et ajout des popups (sans marqueurs)
+    for (const ville in villesMap) {
+      try {
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(ville)}&format=json&limit=1`,
+          {
+            headers: {
+              "Accept-Language": "fr",
+            },
+          }
+        );
+        const results = await response.json();
+
+        if (results.length > 0) {
+          const { lat, lon } = results[0];
+          const pseudos = villesMap[ville];
+          const pseudosText = pseudos.join(", ");
+          L.popup()
+            .setLatLng([parseFloat(lat), parseFloat(lon)])
+            .setContent(`<strong>${ville}</strong><br>Pseudos : ${pseudosText}`)
+            .openOn(map);
+        } else {
+          console.warn(`Ville introuvable : ${ville}`);
+        }
+      } catch (err) {
+        console.error(`Erreur géocodage pour "${ville}" :`, err);
+      }
+    }
+  },
+};
+</script>

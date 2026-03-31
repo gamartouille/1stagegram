@@ -4,7 +4,8 @@ import Home from '../views/Home.vue'
 const routes = [
   { path: '/', name: 'Home', component: Home },
   { path: '/accueil', name: 'Accueil', component: () => import('../views/Accueil.vue') },
-  { path: '/information', name: 'Information', component: () => import('../views/Information.vue') }
+  { path: '/information', name: 'Information', component: () => import('../views/Information.vue') },
+  { path: '/carte', name: 'Carte', component: () => import('../views/Carte.vue') }
 ]
 
 const router = createRouter({

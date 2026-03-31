@@ -3,7 +3,7 @@
         <div v-if="mode === 'signup'" class="auth-form">
             <button class="btn-back" @click="mode = 'choice'">← Retour</button>
             <h2>Avant tout quelques informations sur ton stage</h2>
-            <form @submit.prevent="handleSignup">
+            <form @submit.prevent="Enregistrer">
                 <div class="form-group">
                 <label for="info-title">Titre de ta page</label>
                 <input
@@ -69,6 +69,7 @@
         <button type="submit" class="btn btn-primary" :disabled="loading">
           {{ loading ? 'Enregistrement en cours...' : 'Enregistrer' }}
         </button>
+
         </form>
         </div>
     </div>
@@ -85,7 +86,6 @@ const router = useRouter()
 const mode = ref('signup')
 const loading = ref(false)
 const error = ref('')
-const showSuccessModal = ref(false)
 
 const infoForm = ref({
   titre: '',
@@ -97,7 +97,7 @@ const infoForm = ref({
   bio: ''
 })
 
-async function handleSignup() {
+async function Enregistrer() {
   error.value = ''
 
   // Validation
@@ -148,7 +148,7 @@ async function handleSignup() {
     if (insertError) throw insertError
 
       // Afficher le message de succès et revenir au menu
-    showSuccessModal.value = true
+    router.push({ name: 'Accueil' })
 
     // Réinitialiser le formulaire
     infoForm.value = {
@@ -167,63 +167,6 @@ async function handleSignup() {
   }
 }
 
-async function handleLogin() {
-  error.value = ''
-
-  if (!loginForm.value.pseudo.trim()) {
-    error.value = 'Rentre ton pseudo'
-    return
-  }
-  if (!loginForm.value.code) {
-    error.value = 'Rentre ton mot de passe'
-    return
-  }
-
-  loading.value = true
-
-  try {
-    const pseudo = loginForm.value.pseudo.trim()
-    const pwd = loginForm.value.code
-
-    // Chercher le joueur
-    const { data, error: queryError } = await supabase
-      .from('sessions')
-      .select('*')
-      .eq('pseudo', pseudo)
-      .single()
-
-    if (queryError && queryError.code !== 'PGRST116') throw queryError
-
-    if (!data) {
-      error.value = 'Pseudo ou mot de passe incorrect'
-      loading.value = false
-      return
-    }
-
-    // Vérifier le mot de passe
-    if (data.code !== pwd) {
-      error.value = 'Pseudo ou mot de passe incorrect'
-      loading.value = false
-      return
-    }
-
-    // Succès : sauvegarder et rediriger
-    localStorage.setItem('nick', pseudo)
-    localStorage.setItem('playerCode', data.code)
-    localStorage.setItem('playerId', data.id)
-
-    router.push({ name: 'Accueil', query: { nick: pseudo } })
-  } catch (err) {
-    error.value = 'Erreur : ' + (err.message || String(err))
-  } finally {
-    loading.value = false
-  }
-}
-
-function closeSuccessModal() {
-  showSuccessModal.value = false
-  mode.value = 'choice'
-}
 </script>
 
 

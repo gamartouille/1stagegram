@@ -9,7 +9,8 @@ CREATE TABLE IF NOT EXISTS sessions (
     institut TEXT, 
     date_debut DATE,
     date_retour DATE,
-    bio TEXT
+    bio TEXT,
+    nbr_connexion INT DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS posts (
