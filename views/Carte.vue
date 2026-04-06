@@ -10,24 +10,26 @@
 <script>
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { createClient } from "@supabase/supabase-js";
+import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  'https://komsplwinybifzsmjecu.supabase.co',
-  'sb_publishable_RjquiQjx5rJ1Xj-fp4ou1g_aKmy9Iia'
-);
+const supabaseUrl = 'https://komsplwinybifzsmjecu.supabase.co';
+const supabaseKey = 'sb_publishable_RjquiQjx5rJ1Xj-fp4ou1g_aKmy9Iia';
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 export default {
   async mounted() {
-    // Configuration des icônes Leaflet par défaut
+    // Fix icônes Leaflet
     delete L.Icon.Default.prototype._getIconUrl;
     L.Icon.Default.mergeOptions({
-      iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-      iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-      shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+      iconRetinaUrl:
+        "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
+      iconUrl:
+        "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
+      shadowUrl:
+        "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
     });
 
-    const map = L.map("map").setView([46.603354, 1.888334], 6); // Centré sur la France
+    const map = L.map("map").setView([46.603354, 1.888334], 6);
 
     L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 19,
@@ -35,19 +37,19 @@ export default {
         '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
     }).addTo(map);
 
-    // Récupération des villes et pseudos depuis Supabase
+    // 🔥 Requête Supabase (inchangée sauf si ta table/colonnes ont changé)
     const { data, error } = await supabase
-      .from("sessions")
-      .select("ville, pseudo")
+      .from("sessions") // ⚠️ change ici si ta table a changé
+      .select("ville, pseudo") // ⚠️ adapte si colonnes différentes
       .not("ville", "is", null);
 
     if (error) {
-      console.error("Erreur Supabase :", error);
+      console.error("Erreur Supabase :", error.message);
       return;
     }
 
-    // Grouper par ville et collecter les pseudos
     const villesMap = {};
+
     data.forEach((row) => {
       if (!villesMap[row.ville]) {
         villesMap[row.ville] = [];
@@ -55,27 +57,34 @@ export default {
       villesMap[row.ville].push(row.pseudo);
     });
 
-    // Géocodage et ajout des popups (sans marqueurs)
+    // 🔥 Géocodage + affichage
     for (const ville in villesMap) {
       try {
         const response = await fetch(
-          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(ville)}&format=json&limit=1`,
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
+            ville
+          )}&format=json&limit=1`,
           {
-            headers: {
-              "Accept-Language": "fr",
-            },
+            headers: { "Accept-Language": "fr" },
           }
         );
+
         const results = await response.json();
 
         if (results.length > 0) {
           const { lat, lon } = results[0];
           const pseudos = villesMap[ville];
-          const pseudosText = pseudos.join(", ");
-          L.popup()
-            .setLatLng([parseFloat(lat), parseFloat(lon)])
-            .setContent(`<strong>${ville}</strong><br>Pseudos : ${pseudosText}`)
-            .openOn(map);
+
+          L.circle([parseFloat(lat), parseFloat(lon)], {
+            color: "red",
+            fillColor: "#f03",
+            fillOpacity: 0.3,
+            radius: 10000,
+          })
+            .addTo(map)
+            .bindPopup(
+              `<strong>${ville}</strong><br>${pseudos.join(", ")}`
+            );
         } else {
           console.warn(`Ville introuvable : ${ville}`);
         }
@@ -86,3 +95,5 @@ export default {
   },
 };
 </script>
+
+<style src="./Carte.css" scoped></style>

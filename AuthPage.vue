@@ -144,63 +144,40 @@ const loginForm = ref({
 
 async function handleSignup() {
   error.value = ''
-
-  // Validation
-  if (!signupForm.value.pseudo.trim()) {
-    error.value = 'Rentre un pseudo'
-    return
-  }
-  if (signupForm.value.code.length < 3) {
-    error.value = 'Le mot de passe doit faire au moins 3 caracteres'
-    return
-  }
-  if (signupForm.value.code !== signupForm.value.confirm) {
-    error.value = 'Les mots de passe ne correspondent pas'
-    return
-  }
-
   loading.value = true
 
   try {
-    const pseudo = signupForm.value.pseudo.trim()
-    const newCode = signupForm.value.code.trim()
-    const titre = signupForm.value.titre.trim()
+    const email = signupForm.value.pseudo + "@app.com"
+    const password = signupForm.value.code
 
-    // Vérifier si le pseudo existe déjà
-    const { data: existing, error: checkError } = await supabase
+    const { data, error: signUpError } = await supabase.auth.signUp({
+      email,
+      password
+    })
+
+    if (signUpError) throw signUpError
+
+    // Insérer dans la table sessions
+    const { data: sessionData, error: insertError } = await supabase
       .from('sessions')
-      .select('id')
-      .eq('pseudo', pseudo)
-      .single()
-
-    if (existing) {
-      error.value = 'Ce pseudo existe déjà. Choisis-en un autre.'
-      loading.value = false
-      return
-    }
-
-    // Créer le compte
-    const { data, error: insertError } = await supabase
-      .from('sessions')
-      .insert([
-        {
-          pseudo: pseudo,
-          code: newCode,
-          titre: titre,
-        }
-      ])
+      .insert([{
+        pseudo: signupForm.value.pseudo,
+        code: signupForm.value.code,
+        titre: signupForm.value.titre,
+        nbr_connexion: 0
+      }])
       .select()
-      .single()
 
     if (insertError) throw insertError
 
-      // Afficher le message de succès et revenir au menu
-    showSuccessModal.value = true
+    // Stocker l'ID de session
+    localStorage.setItem('playerId', sessionData[0].id)
 
-    // Réinitialiser le formulaire
+    showSuccessModal.value = true
     signupForm.value = { pseudo: '', code: '', confirm: '', titre: '' }
+
   } catch (err) {
-    error.value = 'Erreur : ' + (err.message || String(err))
+    error.value = err.message
   } finally {
     loading.value = false
   }
@@ -208,68 +185,51 @@ async function handleSignup() {
 
 async function handleLogin() {
   error.value = ''
-
-  if (!loginForm.value.pseudo.trim()) {
-    error.value = 'Rentre ton pseudo'
-    return
-  }
-  if (!loginForm.value.code) {
-    error.value = 'Rentre ton mot de passe'
-    return
-  }
-
   loading.value = true
 
   try {
-    const pseudo = loginForm.value.pseudo.trim()
-    const pwd = loginForm.value.code
+    const email = loginForm.value.pseudo + "@app.com"
+    const password = loginForm.value.code
 
-    // Chercher le joueur
-    const { data, error: queryError } = await supabase
+    const { data, error: loginError } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    })
+
+    if (loginError) throw loginError
+
+    // Récupérer la session
+    const { data: sessionData, error: sessionError } = await supabase
       .from('sessions')
       .select('*')
-      .eq('pseudo', pseudo)
+      .eq('code', loginForm.value.code)
       .single()
 
-    if (queryError && queryError.code !== 'PGRST116') throw queryError
+    if (sessionError) throw sessionError
 
-    if (!data) {
-      error.value = 'Pseudo ou mot de passe incorrect'
-      loading.value = false
-      return
-    }
+    const isFirstLogin = sessionData.nbr_connexion === 0
 
-    // Vérifier le mot de passe
-    if (data.code !== pwd) {
-      error.value = 'Pseudo ou mot de passe incorrect'
-      loading.value = false
-      return
-    }
-
-    // Succès : sauvegarder et rediriger
-  const { error: updateError } = await supabase
+    // Incrémenter nbr_connexion
+    await supabase
       .from('sessions')
-      .update({ nbr_connexion: data.nbr_connexion + 1 })
-      .eq('pseudo', pseudo)
+      .update({ nbr_connexion: sessionData.nbr_connexion + 1 })
+      .eq('id', sessionData.id)
 
-    if (updateError) throw updateError
+    // Stocker l'ID de session
+    localStorage.setItem('playerId', sessionData.id)
 
-    console.log('nbr_connexion après update :', data.nbr_connexion + 1)
-
-    localStorage.setItem('nick', pseudo)
-    localStorage.setItem('playerCode', data.code)
-    localStorage.setItem('playerId', data.id)
-    localStorage.setItem('nbrConnexion', data.nbr_connexion + 1)
-
-    if (data.nbr_connexion === 0) {  // ← 0 car c'est la 1ère connexion (avant l'update)
-      router.push({ name: 'Information', query: { nick: pseudo } })
+    // Rediriger selon si première connexion
+    if (isFirstLogin) {
+      router.push({ name: 'Information' })
     } else {
       router.push({ name: 'Accueil' })
-    }} catch (err) {
-      error.value = 'Erreur : ' + (err.message || String(err))
-    } finally {
-      loading.value = false
     }
+
+  } catch (err) {
+    error.value = err.message
+  } finally {
+    loading.value = false
+  }
 }
 
 function closeSuccessModal() {
