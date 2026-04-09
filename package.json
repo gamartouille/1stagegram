@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "@arcgis/core": "^5.0.15",
+    "@cloudflare/stream-react": "^1.9.3",
     "@supabase/supabase-js": "^2.100.0",
     "@vitejs/plugin-vue": "^6.0.5",
     "dotenv": "^17.3.1",

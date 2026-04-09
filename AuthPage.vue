@@ -202,6 +202,7 @@ async function handleLogin() {
     const { data: sessionData, error: sessionError } = await supabase
       .from('sessions')
       .select('*')
+      .eq('pseudo', loginForm.value.pseudo)
       .eq('code', loginForm.value.code)
       .single()
 

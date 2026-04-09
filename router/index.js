@@ -7,7 +7,8 @@ const routes = [
   { path: '/information', name: 'Information', component: () => import('../views/Information.vue') },
   { path: '/carte', name: 'Carte', component: () => import('../views/Carte.vue') },
   { path: '/post', name: 'Post', component: () => import('../views/Post.vue') },
-  { path: '/profil', name: 'Profil', component: () => import('../views/Profil.vue') }
+  { path: '/monprofil', name: 'MonProfil', component: () => import('../views/MonProfil.vue') },
+  { path: '/profil-public/:id', name: 'ProfilPublic', component: () => import('../views/ProfilPublic.vue') }
 ]
 
 const router = createRouter({
