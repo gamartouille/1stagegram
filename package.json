@@ -15,6 +15,7 @@
   "type": "commonjs",
   "main": "stage.js",
   "scripts": {
+    "build": "vite build",
     "dev": "vite",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
