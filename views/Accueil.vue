@@ -40,7 +40,7 @@
           </div>
           <div class="post-text">
             <p class="post-description">{{ post.description }}</p>
-            <router-link :to="{ name: 'ProfilPublic', params: { id: post.user_id } }">
+            <router-link :to="{ name: 'ProfilPublic', params: { id: post.session_id } }">
               <button class="profile-btn">👤 Voir le profil</button>
             </router-link>
             <button @click="toggleCommentForm(post.id)" class="add-comment-btn">💬 Ajouter un commentaire</button>
@@ -87,8 +87,10 @@ export default {
   },
   methods: {
     async fetchPosts() {
-      const playerId = localStorage.getItem('playerId');
-      if (!playerId) return;
+      const { data, error } = await supabase.auth.getSession();
+      const session = data?.session;
+      if (!session) return;
+      const playerId = session.user.id;
 
       // Récupérer les amis où l'utilisateur est user_id
       const { data: amis1, error: amisError1 } = await supabase
@@ -124,7 +126,7 @@ export default {
       const { data: posts, error: postsError } = await supabase
         .from('posts')
         .select('*')
-        .in('user_id', amisIds);
+        .in('session_id', amisIds);
 
       if (postsError) {
         console.error("Erreur lors de la récupération des posts :", postsError);
@@ -148,7 +150,10 @@ export default {
     },
 
     async fetchUserPseudo() {
-      const playerId = localStorage.getItem('playerId');
+      const { data, error } = await supabase.auth.getSession();
+      const session = data?.session;
+      if (!session) return;
+      const playerId = session.user.id;
       if (playerId) {
         const { data, error } = await supabase
           .from('sessions')
