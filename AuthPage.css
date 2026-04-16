@@ -1,12 +1,11 @@
 @font-face {
   font-family: "myFont";
-  src: url("../Font/COMICATE.TTF");
+  src: url("./Font/COMICATE.TTF");
 }
 
 @font-face {
   font-family: "myFont2";
-  src: url("../Font/Kidmon Demo.otf");
-
+  src: url("./Font/Kidmon Demo.otf");
 }
 
 .auth-page {
@@ -15,7 +14,7 @@
   align-items: flex-start; 
   justify-content: center;
   min-height: 100vh;
-  background-image: url("../Images/fond_ecran.png");
+  background-image: url("./Images/fond_ecran.png");
   background-size: cover;
   padding: 20px;
   box-sizing: border-box;
