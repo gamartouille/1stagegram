@@ -5,6 +5,9 @@
     <router-link :to="{ name: 'Carte' }">
       <button>Carte des stages</button>
     </router-link>
+    <router-link v-if="playerId" :to="{ name: 'ProfilObservateur', params: { id: playerId } }">
+      <button>Mon profil</button>
+    </router-link>
 
     <!-- Barre de recherche de profils -->
     <div class="search-bar">
@@ -19,7 +22,7 @@
     <div v-if="searchResults.length" class="search-results">
       <div v-for="user in searchResults" :key="user.id" class="user-result">
         <p>{{ user.pseudo }}</p>
-        <router-link v-if="user.isAlreadyFriend" :to="{ name: 'ProfilPublic', params: { id: user.id } }">
+        <router-link v-if="user.isAcceptedFriend" :to="{ name: user.observateur ? 'ProfilObservateur' : 'ProfilPublic', params: { id: user.id } }">
           <button class="profile-btn">👤 Voir le profil</button>
         </router-link>
         <button v-else @click="addFriend(user.id)">Ajouter en ami</button>
@@ -44,7 +47,7 @@
           </div>
           <div class="post-text">
             <p class="post-description">{{ post.description }}</p>
-            <router-link :to="{ name: 'ProfilPublic', params: { id: post.session_id } }">
+            <router-link :to="{ name: post.authorObservateur ? 'ProfilObservateur' : 'ProfilPublic', params: { id: post.session_id } }">
               <button class="profile-btn">👤 Voir le profil</button>
             </router-link>
           </div>
@@ -68,10 +71,12 @@ export default {
       posts: [],
       userPseudo: '',
       searchPseudo: '',
-      searchResults: []
+      searchResults: [],
+      playerId: ''
     }
   },
   async mounted() {
+    this.playerId = localStorage.getItem('playerId') || ''
     await this.fetchPosts()
     await this.fetchUserPseudo()
   },
@@ -122,13 +127,14 @@ export default {
 
         const { data: author } = await supabase
           .from('sessions')
-          .select('pseudo')
+          .select('pseudo, observateur')
           .eq('id', post.session_id)
           .single()
 
         return {
           ...post,
           pseudo: author?.pseudo || 'Inconnu',
+          authorObservateur: author?.observateur || false,
           commentaires: comments || []
         }
       }))
@@ -177,17 +183,23 @@ export default {
 
       const { data, error } = await supabase
         .from('sessions')
-        .select('id, pseudo')
+        .select('id, pseudo, observateur')
         .ilike('pseudo', `%${this.searchPseudo.trim()}%`)
 
       if (error) {
         console.error('Erreur lors de la recherche :', error)
       } else {
         this.searchResults = await Promise.all(
-          (data || []).map(async (user) => ({
-            ...user,
-            isAlreadyFriend: await this.isAlreadyFriend(user.id)
-          }))
+          (data || []).map(async (user) => {
+            const status = await this.getFriendshipStatus(user.id)
+            return {
+              ...user,
+              isAcceptedFriend: status.accepted,
+              isPendingFriend: status.pending,
+              isOutgoingRequest: status.outgoing,
+              observateur: user.observateur
+            }
+          })
         )
       }
     },
@@ -234,23 +246,41 @@ export default {
       }
     },
 
-    async isAlreadyFriend(userId) {
+    async getFriendshipStatus(userId) {
       const playerId = localStorage.getItem('playerId')
-      if (!playerId) return false
+      if (!playerId) return { accepted: false, pending: false, outgoing: false }
 
-      const { data: friendship1 } = await supabase
+      const { data: outgoing } = await supabase
         .from('amis')
-        .select('*')
+        .select('id, statut')
         .eq('user_id', playerId)
         .eq('ami_id', userId)
+        .maybeSingle()
 
-      const { data: friendship2 } = await supabase
+      if (outgoing && outgoing.statut) {
+        return {
+          accepted: outgoing.statut === 'accepté',
+          pending: outgoing.statut === 'en_attente',
+          outgoing: true
+        }
+      }
+
+      const { data: incoming } = await supabase
         .from('amis')
-        .select('*')
+        .select('id, statut')
         .eq('user_id', userId)
         .eq('ami_id', playerId)
+        .maybeSingle()
 
-      return (friendship1 && friendship1.length > 0) || (friendship2 && friendship2.length > 0)
+      if (incoming && incoming.statut) {
+        return {
+          accepted: incoming.statut === 'accepté',
+          pending: incoming.statut === 'en_attente',
+          outgoing: false
+        }
+      }
+
+      return { accepted: false, pending: false, outgoing: false }
     }
   }
 }
