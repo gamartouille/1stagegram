@@ -12,6 +12,7 @@
         <span v-if="pendingFriendRequestsCount > 0" class="notification-badge">{{ pendingFriendRequestsCount }}</span>
       </button>
     </router-link>
+    <button @click="logout" class="logout-button">Déconnexion</button>
 
     <!-- Barre de recherche de profils -->
     <div class="search-bar">
@@ -192,6 +193,11 @@ export default {
       if (!error && data) {
         this.pendingFriendRequestsCount = data.length;
       }
+    },
+
+    logout() {
+      localStorage.removeItem('playerId');
+      this.$router.push({ name: 'Home' });
     },
 
     toggleCommentForm(postId) {
