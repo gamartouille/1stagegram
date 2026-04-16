@@ -4,6 +4,7 @@ import Home from '../views/Home.vue'
 const routes = [
   { path: '/', name: 'Home', component: Home },
   { path: '/accueil', name: 'Accueil', component: () => import('../views/Accueil.vue') },
+  { path: '/accueil-observateur', name: 'AccueilObservateur', component: () => import('../views/AccueilObservateur.vue') },
   { path: '/information', name: 'Information', component: () => import('../views/Information.vue') },
   { path: '/carte', name: 'Carte', component: () => import('../views/Carte.vue') },
   { path: '/post', name: 'Post', component: () => import('../views/Post.vue') },

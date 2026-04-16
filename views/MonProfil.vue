@@ -1,14 +1,27 @@
 <template>
   <div class="profil-page">
     <div>
-    <router-link :to="{ name: 'Accueil' }">
-      <button>Accueil</button>
-    </router-link>
+      <router-link :to="{ name: 'Accueil' }">
+        <button>Accueil</button>
+      </router-link>
     </div>
     <div class="profile-header">
       <h1>Mon profil</h1>
       <p class="subtitle">Bienvenue, {{ userPseudo || 'utilisateur' }}</p>
     </div>
+
+    <section class="profile-card info-card">
+      <div class="info-header">
+        <div>
+          <h2>{{ titre || 'non précisé' }}</h2>
+          <p class="info-subtitle">Je fais mon stage à : <strong>{{ ville || 'non précisée' }}</strong></p>
+        </div>
+        <button class="edit-button" @click="goToEditInfo">Éditer</button>
+      </div>
+      <p>Je travaille pour : <strong>{{ institut || 'non précisé' }}</strong></p>
+      <p>Mon sujet est : <strong>{{ sujet || 'non précisé' }}</strong></p>
+      <p>{{ bio}}</p>
+    </section>
 
     <div class="profile-grid">
       <section class="profile-card friends-card">
@@ -32,6 +45,16 @@
       </section>
     </div>
 
+    <!-- Demandes d'amis en attente -->
+    <section class="profile-card" v-if="pendingRequests.length">
+      <h2>Demandes d'amis en attente</h2>
+      <div v-for="req in pendingRequests" :key="req.id" class="friend-request">
+        <span>{{ req.senderPseudo }}</span>
+        <button @click="acceptFriend(req.id)">✅ Accepter</button>
+        <button @click="declineFriend(req.id)">❌ Refuser</button>
+      </div>
+    </section>
+
     <section class="profile-card posts-card">
       <div class="section-title">
         <h2>Historique de mes posts</h2>
@@ -51,19 +74,27 @@
         </article>
       </div>
 
-      <p v-else>Tu n'as pas encore publie de post.</p>
+      <p v-else>Tu n'as pas encore publié de post.</p>
     </section>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { supabase } from '../supabase.js'
 
+const router = useRouter()
 const userPseudo = ref('')
+const ville = ref('')
+const institut = ref('')
+const sujet = ref('')
+const titre = ref('')
+const bio = ref('')
 const friends = ref([])
 const posts = ref([])
 const stageEndDate = ref(null)
+const pendingRequests = ref([])
 
 const daysRemaining = computed(() => {
   if (!stageEndDate.value) return null
@@ -77,10 +108,7 @@ function normalizePhotos(photos) {
   if (!photos) return []
   if (Array.isArray(photos)) return photos
   if (typeof photos === 'string') {
-    return photos
-      .split(',')
-      .map((item) => item.trim())
-      .filter(Boolean)
+    return photos.split(',').map(i => i.trim()).filter(Boolean)
   }
   return []
 }
@@ -100,27 +128,80 @@ async function fetchProfileData() {
   const playerId = localStorage.getItem('playerId')
   if (!playerId) return
 
-  const { data: session, error: sessionError } = await supabase
+  // Profil
+  const { data: session } = await supabase
     .from('sessions')
-    .select('pseudo, date_retour, date_debut')
+    .select('pseudo, date_retour, ville, institut, sujet, titre, bio')
     .eq('id', playerId)
     .single()
 
-  if (!sessionError && session) {
+  if (session) {
     userPseudo.value = session.pseudo
     stageEndDate.value = session.date_retour
+    ville.value = session.ville || ''
+    institut.value = session.institut || ''
+    sujet.value = session.sujet || ''
+    titre.value = session.titre || ''
+    bio.value = session.bio || ''
   }
 
-  const { data: friendData, error: friendError } = await supabase
-    .from('sessions')
-    .select('id, pseudo, titre')
-    .neq('id', playerId)
-    .limit(8)
+  // Amis acceptés (dans les deux sens)
+  const { data: amis1 } = await supabase
+    .from('amis')
+    .select('ami_id')
+    .eq('user_id', playerId)
+    .eq('statut', 'accepté')
 
-  if (!friendError && friendData) {
-    friends.value = friendData
+  const { data: amis2 } = await supabase
+    .from('amis')
+    .select('user_id')
+    .eq('ami_id', playerId)
+    .eq('statut', 'accepté')
+
+  const friendIds = [
+    ...(amis1 || []).map(a => a.ami_id),
+    ...(amis2 || []).map(a => a.user_id)
+  ]
+
+  if (friendIds.length > 0) {
+    const { data: friendData } = await supabase
+      .from('sessions')
+      .select('id, pseudo, titre')
+      .in('id', friendIds)
+    friends.value = friendData || []
+  } else {
+    friends.value = []
   }
 
+  // Demandes en attente reçues par moi
+  const { data: pending, error: pendingError } = await supabase
+    .from('amis')
+    .select('id, user_id')
+    .eq('ami_id', playerId)
+    .eq('statut', 'en_attente')
+
+  console.log('Demandes en attente brutes :', pending, pendingError)
+
+  if (pending && pending.length > 0) {
+    const senderIds = pending.map(p => p.user_id)
+    const { data: senders } = await supabase
+      .from('sessions')
+      .select('id, pseudo')
+      .in('id', senderIds)
+
+    pendingRequests.value = pending.map(req => ({
+      // int8 Supabase retourne un string en JS → on force en Number pour le filtre .eq()
+      id: Number(req.id),
+      senderId: req.user_id,
+      senderPseudo: senders?.find(s => s.id === req.user_id)?.pseudo || 'Inconnu'
+    }))
+  } else {
+    pendingRequests.value = []
+  }
+
+  console.log('pendingRequests construits :', pendingRequests.value)
+
+  // Posts de l'utilisateur
   const { data: postData, error: postError } = await supabase
     .from('posts')
     .select('*')
@@ -128,10 +209,52 @@ async function fetchProfileData() {
     .order('id', { ascending: false })
 
   if (!postError && postData) {
-    posts.value = postData.map((post) => ({
+    posts.value = postData.map(post => ({
       ...post,
       photos: normalizePhotos(post.photos)
     }))
+  } else {
+    console.error('Erreur posts :', postError)
+  }
+}
+
+function goToEditInfo() {
+  router.push({ name: 'Information', query: { from: 'edit' } })
+}
+
+async function acceptFriend(amiRelationId) {
+  console.log('Accepter - id :', amiRelationId, '| type :', typeof amiRelationId)
+
+  const { data, error } = await supabase
+    .from('amis')
+    .update({ statut: 'accepté' })
+    .eq('id', Number(amiRelationId))
+
+  console.log('Update résultat :', data, '| erreur :', error)
+
+  if (error) {
+    console.error("Erreur lors de l'acceptation :", error)
+    alert("Erreur : " + error.message)
+  } else {
+    await fetchProfileData()
+  }
+}
+
+async function declineFriend(amiRelationId) {
+  console.log('Refuser - id :', amiRelationId, '| type :', typeof amiRelationId)
+
+  const { data, error } = await supabase
+    .from('amis')
+    .delete()
+    .eq('id', Number(amiRelationId))
+
+  console.log('Delete résultat :', data, '| erreur :', error)
+
+  if (error) {
+    console.error('Erreur lors du refus :', error)
+    alert("Erreur : " + error.message)
+  } else {
+    await fetchProfileData()
   }
 }
 

@@ -1,8 +1,8 @@
 <template>
     <div class="info-page">
         <div v-if="mode === 'signup'" class="auth-form">
-            <button class="btn-back" @click="mode = 'choice'">← Retour</button>
-            <h2>Avant tout quelques informations sur ton stage</h2>
+            <button class="btn-back" @click="goBack">← Retour</button>
+            <h2>{{ fromEdit ? 'Modifier mes informations de stage' : 'Avant tout quelques informations sur ton stage' }}</h2>
             <form @submit.prevent="Enregistrer">
                 <div class="form-group">
                 <label for="info-title">Titre de ta page</label>
@@ -78,13 +78,15 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { supabase } from '../supabase.js'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 
 const router = useRouter()
+const route = useRoute()
 
 const mode = ref('signup')
 const loading = ref(false)
 const error = ref('')
+const fromEdit = ref(route.query.from === 'edit')
 
 const infoForm = ref({
   titre: '',
@@ -174,12 +176,25 @@ async function Enregistrer() {
 
     if (updateError) throw updateError
 
-    router.push({ name: 'Accueil' })
+    // Rediriger selon la provenance
+    if (fromEdit.value) {
+      router.push({ name: 'MonProfil' })
+    } else {
+      router.push({ name: 'Accueil' })
+    }
 
   } catch (err) {
     error.value = err.message
   } finally {
     loading.value = false
+  }
+}
+
+function goBack() {
+  if (fromEdit.value) {
+    router.push({ name: 'MonProfil' })
+  } else {
+    router.push({ name: 'Accueil' })
   }
 }
 </script>

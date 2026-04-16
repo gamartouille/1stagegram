@@ -6,9 +6,21 @@
     </router-link>
     </div>
     <div class="profile-header">
-      <h1>Profil de {{ userPseudo || 'utilisateur' }}</h1>
+      <h1>{{ titre || 'non précisé' }}</h1>
       <p class="subtitle">{{ userPseudo || 'utilisateur' }}</p>
     </div>
+
+    <section class="profile-card info-card">
+      <div class="info-header">
+        <div>
+          <p class="info-subtitle">{{ isOwnProfile ? 'Je fais mon stage à :' : 'Fait son stage à :' }} <strong>{{ ville || 'non précisée' }}</strong></p>
+        </div>
+        <button v-if="isOwnProfile" class="edit-button" @click="goToEditInfo">Éditer</button>
+      </div>
+      <p>{{ isOwnProfile ? 'Je travaille pour :' : 'Travaille pour :' }} <strong>{{ institut || 'non précisé' }}</strong></p>
+      <p>{{ isOwnProfile ? 'Mon sujet est :' : 'Son sujet est :' }} <strong>{{ sujet || 'non précisé' }}</strong></p>
+      <p>{{ bio}}</p>    
+    </section>
 
     <div class="profile-grid">
       <section class="profile-card friends-card">
@@ -58,14 +70,21 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { supabase } from '../supabase.js'
 
 const route = useRoute()
+const router = useRouter()
 const userPseudo = ref('')
+const ville = ref('')
+const institut = ref('')
+const sujet = ref('')
+const titre = ref('')
+const bio = ref('')
 const friends = ref([])
 const posts = ref([])
 const stageEndDate = ref(null)
+const isOwnProfile = computed(() => route.params.id === localStorage.getItem('playerId'))
 
 const daysRemaining = computed(() => {
   if (!stageEndDate.value) return null
@@ -104,13 +123,18 @@ async function fetchProfileData() {
 
   const { data: session, error: sessionError } = await supabase
     .from('sessions')
-    .select('pseudo, date_retour, date_debut')
+    .select('pseudo, date_retour, date_debut, ville, institut, sujet, titre, bio')
     .eq('id', userId)
     .single()
 
   if (!sessionError && session) {
     userPseudo.value = session.pseudo
     stageEndDate.value = session.date_retour
+    ville.value = session.ville || ''
+    institut.value = session.institut || ''
+    sujet.value = session.sujet || ''
+    titre.value = session.titre || ''
+    bio.value = session.bio || ''
   }
 
   const { data: friendData, error: friendError } = await supabase
@@ -126,7 +150,7 @@ async function fetchProfileData() {
   const { data: postData, error: postError } = await supabase
     .from('posts')
     .select('*')
-    .eq('user_id', userId)
+    .eq('session_id', userId)
     .order('id', { ascending: false })
 
   if (!postError && postData) {
@@ -135,6 +159,10 @@ async function fetchProfileData() {
       photos: normalizePhotos(post.photos)
     }))
   }
+}
+
+function goToEditInfo() {
+  router.push({ name: 'Information', query: { from: 'edit' } })
 }
 
 onMounted(fetchProfileData)

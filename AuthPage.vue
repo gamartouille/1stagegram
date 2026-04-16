@@ -51,15 +51,14 @@
           />
         </div>
 
-        <div class="form-group">
-          <label for="signup-title">Titre de ta page (optionnel)</label>
-          <input
-            id="signup-title"
-            v-model="signupForm.titre"
-            type="text"
-            maxlength="100"
-            placeholder="ex: Neuille au Costa Rica baby"
-          />
+        <div class="form-group checkbox-group">
+          <label>
+            <input
+              type="checkbox"
+              v-model="signupForm.observateur"
+            />
+            Je suis observateur
+          </label>
         </div>
 
         <div v-if="error" class="error-message">{{ error }}</div>
@@ -134,7 +133,8 @@ const signupForm = ref({
   pseudo: '',
   code: '',
   confirm: '',
-  titre:''
+  titre: '',
+  observateur: false
 })
 
 const loginForm = ref({
@@ -164,6 +164,7 @@ async function handleSignup() {
         pseudo: signupForm.value.pseudo,
         code: signupForm.value.code,
         titre: signupForm.value.titre,
+        observateur: signupForm.value.observateur,
         nbr_connexion: 0
       }])
       .select()
@@ -174,7 +175,7 @@ async function handleSignup() {
     localStorage.setItem('playerId', sessionData[0].id)
 
     showSuccessModal.value = true
-    signupForm.value = { pseudo: '', code: '', confirm: '', titre: '' }
+    signupForm.value = { pseudo: '', code: '', confirm: '', titre: '', observateur: false }
 
   } catch (err) {
     error.value = err.message
@@ -209,6 +210,7 @@ async function handleLogin() {
     if (sessionError) throw sessionError
 
     const isFirstLogin = sessionData.nbr_connexion === 0
+    const isObserver = sessionData.observateur === true
 
     // Incrémenter nbr_connexion
     await supabase
@@ -219,8 +221,10 @@ async function handleLogin() {
     // Stocker l'ID de session
     localStorage.setItem('playerId', sessionData.id)
 
-    // Rediriger selon si première connexion
-    if (isFirstLogin) {
+    // Rediriger selon le rôle et si première connexion
+    if (isObserver) {
+      router.push({ name: 'AccueilObservateur' })
+    } else if (isFirstLogin) {
       router.push({ name: 'Information' })
     } else {
       router.push({ name: 'Accueil' })

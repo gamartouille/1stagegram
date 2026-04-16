@@ -34,6 +34,10 @@
     <!-- Section pour afficher les posts -->
     <div class="posts-container">
       <div v-for="post in posts" :key="post.id" class="post">
+        <div class="post-header">
+          <p class="post-author">Poste par : <strong>{{ post.pseudo || 'Inconnu' }}</strong></p>
+          <p class="post-date">{{ formatDate(post.date) }}</p>
+        </div>
         <div class="post-content">
           <div class="post-photos">
             <img v-for="(photo, index) in normalizePhotos(post.photos)" :key="index" :src="photo" alt="Photo du post" class="photo-img" />
@@ -55,13 +59,14 @@
           </div>
         </div>
         <div class="post-comments" v-if="post.commentaires && post.commentaires.length">
-          <p v-for="(comment, idx) in post.commentaires" :key="idx" class="comment"><strong>{{ comment.auteur }}:</strong> {{ comment.contenu }}</p>
+          <p v-for="(comment, idx) in post.commentaires" :key="idx" class="comment">
+            <strong>{{ comment.auteur || 'Inconnu' }}</strong> ({{ formatDate(comment.date_creation) }}) : {{ comment.contenu }}
+          </p>
         </div>
       </div>
     </div>
   </div>
 </template>
-
 
 <script>
 import { createClient } from '@supabase/supabase-js';
@@ -73,36 +78,35 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 export default {
   data() {
     return {
-      posts: [], // Stocke les posts
-      commentForms: {}, // Pour afficher le formulaire de commentaire par post
-      newComments: {}, // Pour stocker le nouveau commentaire par post
-      userPseudo: '', // Pseudo de l'utilisateur connecté
+      posts: [],
+      commentForms: {},
+      newComments: {},
+      userPseudo: '',
       searchPseudo: '',
       searchResults: []
     };
   },
   async mounted() {
-    await this.fetchPosts(); // Récupère les posts au chargement de la page
-    await this.fetchUserPseudo(); // Récupère le pseudo de l'utilisateur
+    await this.fetchPosts();
+    await this.fetchUserPseudo();
   },
   methods: {
     async fetchPosts() {
-      const { data, error } = await supabase.auth.getSession();
-      const session = data?.session;
-      if (!session) return;
-      const playerId = session.user.id;
+      // Utilisation de localStorage comme partout ailleurs dans l'app
+      const playerId = localStorage.getItem('playerId');
+      if (!playerId) return;
 
       // Récupérer les amis où l'utilisateur est user_id
       const { data: amis1, error: amisError1 } = await supabase
         .from('amis')
-        .select('ami_id, user_id')
+        .select('ami_id')
         .eq('user_id', playerId)
         .eq('statut', 'accepté');
 
       // Récupérer les amis où l'utilisateur est ami_id
       const { data: amis2, error: amisError2 } = await supabase
         .from('amis')
-        .select('ami_id, user_id')
+        .select('user_id')
         .eq('ami_id', playerId)
         .eq('statut', 'accepté');
 
@@ -111,64 +115,65 @@ export default {
         return;
       }
 
-      // Combiner les résultats
-      const amis = [...amis1, ...amis2];
-
-      // Extraire les IDs des amis
-      const amisIds = amis.map((relation) =>
-        relation.user_id === playerId ? relation.ami_id : relation.user_id
-      );
+      // Extraire les IDs des amis dans les deux sens
+      const amisIds = [
+        ...(amis1 || []).map(a => a.ami_id),
+        ...(amis2 || []).map(a => a.user_id)
+      ];
 
       // Ajouter l'ID de l'utilisateur actuel pour voir ses propres posts
       amisIds.push(playerId);
 
-      // Récupérer les posts des amis
+      // Récupérer les posts des amis + les siens
       const { data: posts, error: postsError } = await supabase
         .from('posts')
         .select('*')
-        .in('session_id', amisIds);
+        .in('session_id', amisIds)
+        .order('id', { ascending: false });
 
       if (postsError) {
         console.error("Erreur lors de la récupération des posts :", postsError);
         return;
       }
 
-      // Récupérer les commentaires pour chaque post
-      this.posts = await Promise.all(posts.map(async (post) => {
-        const { data: comments, error: commentsError } = await supabase
+      // Récupérer les commentaires et le pseudo pour chaque post
+      this.posts = await Promise.all((posts || []).map(async (post) => {
+        const { data: comments } = await supabase
           .from('commentaires')
           .select('*')
           .eq('post_id', post.id);
 
-        if (commentsError) {
-          console.error(`Erreur lors de la récupération des commentaires pour le post ${post.id}:`, commentsError);
-          return { ...post, commentaires: [] };
-        }
+        const { data: author } = await supabase
+          .from('sessions')
+          .select('pseudo')
+          .eq('id', post.session_id)
+          .single();
 
-        return { ...post, commentaires: comments };
+        return {
+          ...post,
+          pseudo: author?.pseudo || 'Inconnu',
+          commentaires: comments || []
+        };
       }));
     },
 
     async fetchUserPseudo() {
-      const { data, error } = await supabase.auth.getSession();
-      const session = data?.session;
-      if (!session) return;
-      const playerId = session.user.id;
-      if (playerId) {
-        const { data, error } = await supabase
-          .from('sessions')
-          .select('pseudo')
-          .eq('id', playerId)
-          .single();
+      const playerId = localStorage.getItem('playerId');
+      if (!playerId) return;
 
-        if (!error) {
-          this.userPseudo = data.pseudo;
-        }
+      const { data, error } = await supabase
+        .from('sessions')
+        .select('pseudo')
+        .eq('id', playerId)
+        .single();
+
+      if (!error && data) {
+        this.userPseudo = data.pseudo;
       }
     },
 
     toggleCommentForm(postId) {
-      this.commentForms = { ...this.commentForms, [postId]: !this.commentForms[postId] };    
+      this.commentForms = { ...this.commentForms, [postId]: !this.commentForms[postId] };
     },
 
     async addComment(postId) {
@@ -180,7 +185,7 @@ export default {
         .insert([
           {
             post_id: postId,
-            auteur: this.userPseudo, // Utilise le pseudo de l'utilisateur connecté
+            auteur: this.userPseudo,
             contenu: comment.trim(),
             date_creation: new Date().toISOString()
           }
@@ -191,7 +196,7 @@ export default {
       } else {
         this.newComments[postId] = '';
         this.commentForms[postId] = false;
-        await this.fetchPosts(); // Rafraîchir les posts et commentaires
+        await this.fetchPosts();
       }
     },
 
@@ -206,7 +211,6 @@ export default {
       if (error) {
         console.error("Erreur lors de la recherche :", error);
       } else {
-        // Vérifier pour chaque utilisateur s'il est déjà ami
         this.searchResults = await Promise.all(
           data.map(async (user) => ({
             ...user,
@@ -223,30 +227,24 @@ export default {
         return;
       }
 
-      // Vérifier si une demande d'ami existe déjà
-      const { data: existingFriendship1, error: checkError1 } = await supabase
+      // Vérifier si une relation existe déjà (dans les deux sens)
+      const { data: existing1 } = await supabase
         .from('amis')
-        .select('*')
+        .select('id')
         .eq('user_id', playerId)
         .eq('ami_id', amiId);
 
-      const { data: existingFriendship2, error: checkError2 } = await supabase
+      const { data: existing2 } = await supabase
         .from('amis')
-        .select('*')
+        .select('id')
         .eq('user_id', amiId)
         .eq('ami_id', playerId);
 
-      if (checkError1 || checkError2) {
-        console.error("Erreur lors de la vérification de l'amitié :", checkError1 || checkError2);
-        return;
-      }
-
-      if (existingFriendship1.length > 0 || existingFriendship2.length > 0) {
+      if ((existing1 && existing1.length > 0) || (existing2 && existing2.length > 0)) {
         alert("Une demande d'ami existe déjà.");
         return;
       }
 
-      // Envoyer la demande d'ami
       const { error } = await supabase
         .from('amis')
         .insert({
@@ -281,19 +279,31 @@ export default {
       const playerId = localStorage.getItem('playerId');
       if (!playerId) return false;
 
-      const { data: friendship1 } = await supabase
+      const { data: f1 } = await supabase
         .from('amis')
-        .select('*')
+        .select('id')
         .eq('user_id', playerId)
         .eq('ami_id', userId);
 
-      const { data: friendship2 } = await supabase
+      const { data: f2 } = await supabase
         .from('amis')
-        .select('*')
+        .select('id')
         .eq('user_id', userId)
         .eq('ami_id', playerId);
 
-      return (friendship1 && friendship1.length > 0) || (friendship2 && friendship2.length > 0);
+      return (f1 && f1.length > 0) || (f2 && f2.length > 0);
+    },
+
+    formatDate(dateString) {
+      if (!dateString) return 'Date inconnue';
+      const date = new Date(dateString);
+      return date.toLocaleString('fr-FR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
     }
   },
 };

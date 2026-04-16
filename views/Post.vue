@@ -25,6 +25,21 @@
       placeholder="Dis nous tout"
     ></textarea>
 
+    <div>
+      <label for="post-date">Date du post :</label>
+      <input
+        type="datetime-local"
+        id="post-date"
+        v-model="postDate"
+      />
+    </div>
+
+    <button
+      @click="uploadMedias"
+      :disabled="selectedFiles.length === 0 || !caption"
+    >
+      Valider le post
+    </button>
 
     <div v-if="selectedFiles.length > 0">
       <h3>Aperçu des médias :</h3>
@@ -49,17 +64,14 @@
 </template>
 
 <script>
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = 'https://komsplwinybifzsmjecu.supabase.co';
-const supabaseKey = 'sb_publishable_RjquiQjx5rJ1Xj-fp4ou1g_aKmy9Iia';
-const supabase = createClient(supabaseUrl, supabaseKey);
+import { supabase } from '../supabase.js'; // ← import unique, plus de createClient ici
 
 export default {
   data() {
     return {
       selectedFiles: [],
       caption: '',
+      postDate: '',
     };
   },
   methods: {
@@ -71,7 +83,6 @@ export default {
       const files = event.target.files;
       if (files.length > 0) {
         this.selectedFiles = Array.from(files);
-        this.uploadMedias();
       }
     },
 
@@ -80,26 +91,26 @@ export default {
     },
 
     async uploadMedias() {
-      const { data: { session } } = await supabase.auth.getSession();
+      // Utilise localStorage comme partout ailleurs dans l'app
+      const playerId = localStorage.getItem('playerId');
 
-      if (!session) {
+      if (!playerId) {
         alert("Tu dois être connecté !");
         return;
       }
 
-      const user = session.user;
       const mediaUrls = [];
 
       for (const file of this.selectedFiles) {
-        const fileName = `${user.id}/${Date.now()}_${file.name}`;
+        const fileName = `${playerId}/${Date.now()}_${file.name}`;
 
-        const { error } = await supabase.storage
+        const { error: uploadError } = await supabase.storage
           .from('post_images')
           .upload(fileName, file);
 
-        if (error) {
-          console.error(error);
-          alert(error.message);
+        if (uploadError) {
+          console.error(uploadError);
+          alert(uploadError.message);
           return;
         }
 
@@ -110,21 +121,28 @@ export default {
         mediaUrls.push(publicUrl);
       }
 
-      // Sauvegarde le post avec la description
+      // postDate vide → null pour éviter l'erreur "invalid input syntax for timestamp"
+      const dateToInsert = this.postDate ? this.postDate : null;
+
       const { error } = await supabase
         .from('posts')
         .insert([{
           photos: mediaUrls,
-          description: this.caption, // Ajoute cette ligne
-          session_id: user.id,
+          description: this.caption,
+          date: dateToInsert,
+          session_id: playerId,
         }]);
+
+      console.log("Post inséré avec session_id :", playerId);
 
       if (error) {
         console.error(error);
+        alert("Erreur lors de la création du post : " + error.message);
       } else {
         alert("Post créé !");
         this.selectedFiles = [];
-        this.caption = ''; // Réinitialise le textarea
+        this.caption = '';
+        this.postDate = '';
       }
     }
   },
