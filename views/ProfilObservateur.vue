@@ -1,7 +1,7 @@
 <template>
   <div class="profil-page">
     <div>
-      <router-link :to="{ name: 'Accueil' }">
+      <router-link :to="{ name: isOwnProfile && isObserver ? 'AccueilObservateur' : 'Accueil' }">
         <button>Accueil</button>
       </router-link>
     </div>
@@ -46,6 +46,7 @@ const router = useRouter()
 const userId = route.params.id
 const currentUserId = localStorage.getItem('playerId')
 const isOwnProfile = computed(() => userId === currentUserId)
+const isObserver = ref(true)
 const userPseudo = ref('')
 const friends = ref([])
 const pendingRequests = ref([])

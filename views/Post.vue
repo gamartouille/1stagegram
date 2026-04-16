@@ -1,6 +1,6 @@
 <template>
   <div class="accueil-button">
-    <router-link :to="{ name: 'Accueil' }">
+    <router-link :to="{ name: isObserver ? 'AccueilObservateur' : 'Accueil' }">
       <button>Accueil</button>
     </router-link>
   </div>
@@ -72,9 +72,28 @@ export default {
       selectedFiles: [],
       caption: '',
       postDate: '',
+      isObserver: false
     };
   },
+  mounted() {
+    this.checkObserverStatus();
+  },
   methods: {
+    async checkObserverStatus() {
+      const playerId = localStorage.getItem('playerId');
+      if (!playerId) return;
+
+      const { data: session } = await supabase
+        .from('sessions')
+        .select('observateur')
+        .eq('id', playerId)
+        .single();
+
+      if (session) {
+        this.isObserver = session.observateur === true;
+      }
+    },
+
     triggerFileInput() {
       this.$refs.fileInput.click();
     },

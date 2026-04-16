@@ -1,6 +1,6 @@
 <template>
   <div class="accueil-button">
-    <router-link :to="{ name: 'Accueil' }">
+    <router-link :to="{ name: isObserver ? 'AccueilObservateur' : 'Accueil' }">
       <button>Accueil</button>
     </router-link>
   </div>
@@ -11,12 +11,35 @@
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { createClient } from '@supabase/supabase-js';
+import { ref, onMounted } from 'vue';
 
 const supabaseUrl = 'https://komsplwinybifzsmjecu.supabase.co';
 const supabaseKey = 'sb_publishable_RjquiQjx5rJ1Xj-fp4ou1g_aKmy9Iia';
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 export default {
+  setup() {
+    const isObserver = ref(false);
+
+    async function checkObserverStatus() {
+      const playerId = localStorage.getItem('playerId');
+      if (!playerId) return;
+
+      const { data: session } = await supabase
+        .from('sessions')
+        .select('observateur')
+        .eq('id', playerId)
+        .single();
+
+      if (session) {
+        isObserver.value = session.observateur === true;
+      }
+    }
+
+    onMounted(checkObserverStatus);
+
+    return { isObserver };
+  },
   async mounted() {
     // Fix icônes Leaflet
     delete L.Icon.Default.prototype._getIconUrl;

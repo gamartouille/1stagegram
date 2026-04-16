@@ -8,7 +8,7 @@
     <router-link v-if="playerId" :to="{ name: 'ProfilObservateur', params: { id: playerId } }">
       <button>Mon profil</button>
     </router-link>
-    <button @click="logout" class="logout-button">Déconnexion</button>
+    <button @click="logout" class="logout-button">Deconnexion</button>
 
     <!-- Barre de recherche de profils -->
     <div class="search-bar">

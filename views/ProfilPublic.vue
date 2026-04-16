@@ -1,7 +1,7 @@
 <template>
   <div class="profil-page">
     <div>
-    <router-link :to="{ name: 'Accueil' }">
+    <router-link :to="{ name: isObserver ? 'AccueilObservateur' : 'Accueil' }">
       <button>Accueil</button>
     </router-link>
     </div>
@@ -84,6 +84,7 @@ const bio = ref('')
 const friends = ref([])
 const posts = ref([])
 const stageEndDate = ref(null)
+const isObserver = ref(false)
 const isOwnProfile = computed(() => route.params.id === localStorage.getItem('playerId'))
 
 const daysRemaining = computed(() => {
@@ -120,6 +121,20 @@ function formatDate(value) {
 async function fetchProfileData() {
   const userId = route.params.id
   if (!userId) return
+
+  // Charger le statut observateur de l'utilisateur courant
+  const playerId = localStorage.getItem('playerId')
+  if (playerId) {
+    const { data: currentUser } = await supabase
+      .from('sessions')
+      .select('observateur')
+      .eq('id', playerId)
+      .single()
+    
+    if (currentUser) {
+      isObserver.value = currentUser.observateur === true
+    }
+  }
 
   const { data: session, error: sessionError } = await supabase
     .from('sessions')
