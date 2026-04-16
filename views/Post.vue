@@ -1,62 +1,92 @@
 <template>
-  <div class="accueil-button">
-    <router-link :to="{ name: isObserver ? 'AccueilObservateur' : 'Accueil' }">
-      <button>Accueil</button>
-    </router-link>
-  </div>
-  <div>
-    <button @click="triggerFileInput">
-      Importer des médias
-    </button>
-
-    <input
-      type="file"
-      ref="fileInput"
-      @change="handleFileUpload"
-      accept="image/*,video/*"
-      style="display: none;"
-      multiple
-    />
-
-    <textarea
-      v-model="caption"
-      name="caption"
-      id="caption"
-      placeholder="Dis nous tout"
-    ></textarea>
-
-    <div>
-      <label for="post-date">Date du post :</label>
-      <input
-        type="datetime-local"
-        id="post-date"
-        v-model="postDate"
-      />
+  <div class="post-page">
+    <div class="accueil-button">
+      <router-link :to="{ name: isObserver ? 'AccueilObservateur' : 'Accueil' }">
+        <button class="btn btn-secondary">Accueil</button>
+      </router-link>
     </div>
 
-    <button
-      @click="uploadMedias"
-      :disabled="selectedFiles.length === 0 || !caption"
-    >
-      Valider le post
-    </button>
+    <div class="post-container">
+      <div class="post-header">
+        <h2>Poster des nouvelles</h2>
+        <p class="subtitle">Partage tes expériences de stage avec la communauté</p>
+      </div>
 
-    <div v-if="selectedFiles.length > 0">
-      <h3>Aperçu des médias :</h3>
-      <div v-for="(file, index) in selectedFiles" :key="index">
-        <div v-if="file.type.startsWith('image/')">
-          <img
-            :src="getObjectURL(file)"
-            alt="Aperçu"
-            style="max-width: 200px; max-height: 200px;"
-          />
+      <form @submit.prevent="uploadMedias">
+        <div class="form-section">
+          <div class="form-group">
+            <label for="caption">Description de ton post</label>
+            <textarea
+              id="caption"
+              v-model="caption"
+              placeholder="Dis nous tout sur ton expérience..."
+              required
+            ></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="post-date">Date du post (optionnel)</label>
+            <input
+              type="datetime-local"
+              id="post-date"
+              v-model="postDate"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Médias (images ou vidéos)</label>
+            <button type="button" @click="triggerFileInput" class="btn btn-secondary">
+              📎 Importer des médias
+            </button>
+            <input
+              type="file"
+              ref="fileInput"
+              @change="handleFileUpload"
+              accept="image/*,video/*"
+              style="display: none;"
+              multiple
+            />
+            <p v-if="selectedFiles.length > 0" style="margin-top: 10px; color: #666;">
+              {{ selectedFiles.length }} fichier(s) sélectionné(s)
+            </p>
+          </div>
         </div>
-        <div v-else-if="file.type.startsWith('video/')">
-          <video
-            :src="getObjectURL(file)"
-            controls
-            style="max-width: 200px; max-height: 200px;"
-          />
+
+        <div class="button-group">
+          <button
+            type="submit"
+            class="btn btn-primary"
+            :disabled="selectedFiles.length === 0 || !caption.trim()"
+          >
+            📤 Publier le post
+          </button>
+        </div>
+      </form>
+
+      <div v-if="selectedFiles.length > 0" class="preview-section">
+        <h3>🖼️ Aperçu des médias</h3>
+        <div class="media-grid">
+          <div
+            v-for="(file, index) in selectedFiles"
+            :key="index"
+            class="media-item"
+          >
+            <div v-if="file.type.startsWith('image/')">
+              <img
+                :src="getObjectURL(file)"
+                alt="Aperçu"
+              />
+            </div>
+            <div v-else-if="file.type.startsWith('video/')">
+              <video
+                :src="getObjectURL(file)"
+                controls
+              ></video>
+            </div>
+            <div class="media-caption">
+              {{ file.name }}
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -167,3 +197,5 @@ export default {
   },
 };
 </script>
+
+<style src="./Post.css" scoped></style>

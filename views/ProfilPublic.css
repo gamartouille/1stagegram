@@ -113,6 +113,8 @@
 
 .edit-button:hover {
   opacity: 0.9;
+  transform: translateY(-2px);
+  box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.4);
 }
 
 .countdown {
@@ -211,7 +213,8 @@ button {
 }
 
 button:hover {
-  transform: scale(1.05);
+  transform: translateY(-2px);
+  box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.4);
 }
 
 @media (max-width: 900px) {

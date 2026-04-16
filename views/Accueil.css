@@ -49,7 +49,8 @@ button {
 }
 
 button:hover {
-  transform: scale(1.05);
+  transform: translateY(-2px);
+  box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.4);
 }
 
 .profile-button {
@@ -81,6 +82,30 @@ button:hover {
   background-color: #ffdede;
   color: #a00;
   border: 1px solid #f7bebe;
+}
+
+.pending-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.add-comment-btn {
+  background-color: rgb(148, 193, 30);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin: 5px 5px 10px 0;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: "myFont2", cursive;
+  font-size: 0.9em;
+}
+
+.add-comment-btn:hover {
+  background-color: rgb(128, 173, 10);
+  transform: translateY(-2px);
+  box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.4);
 }
 
 .central-box {
@@ -265,7 +290,8 @@ button:hover {
 
 .profile-btn:hover {
   background-color: rgb(128, 173, 10);
-  transform: scale(1.05);
+  transform: translateY(-2px);
+  box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.4);
 }
 
 @keyframes float {
