@@ -285,6 +285,11 @@ function goToFriendProfileObservateur(friendId) {
 }
 
 async function handleFriendClick(friend) {
+  if (friend.id === currentUserId) {
+    router.push({ name: 'MonProfil' })
+    return
+  }
+
   if (isOwnProfile.value) {
     return friend.observateur ? goToFriendProfileObservateur(friend.id) : goToFriendProfile(friend.id)
   }
