@@ -105,9 +105,14 @@ export default {
             radius: 10000,
           })
             .addTo(map)
-            .bindPopup(
-              `<strong>${ville}</strong><br>${pseudos.join(", ")}`
-            );
+            .bindTooltip(
+                `<strong>${ville}</strong><br>${pseudos.join(", ")}`,
+                {
+                  permanent: false, // La tooltip disparaît quand on ne survole plus
+                  direction: "auto", // La tooltip s'affiche intelligemment autour du curseur
+                  sticky: true, // La tooltip reste visible tant que le curseur est sur l'élément
+                }
+              );
         } else {
           console.warn(`Ville introuvable : ${ville}`);
         }

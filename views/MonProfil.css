@@ -5,86 +5,87 @@
 
 .profil-page {
   min-height: 100vh;
-  padding: 40px 20px;
+  padding: 50px 20px;
   box-sizing: border-box;
   font-family: "myFont2", cursive;
-  background-color: rgb(255, 153, 216);
+  background-color: rgb(255, 153, 216); /* Fond crème pastel */
+  color: #333;
 }
 
 .profile-header {
   max-width: 1200px;
-  margin: 0 auto 30px;
+  margin: 0 auto 40px;
   text-align: center;
-  color: rgb(148, 193, 30);
+  color: rgb(148, 193, 30); /* Vert doux */
 }
 
 .profile-header h1 {
-  font-size: 3rem;
-  margin-bottom: 8px;
+  font-size: 2.8rem;
+  margin-bottom: 12px;
+  font-weight: 600;
 }
 
 .profile-header .subtitle {
-  font-size: 1.2rem;
-  color: #333;
+  font-size: 1.3rem;
+  color: #555;
 }
 
 .profile-grid {
   display: grid;
-  gap: 20px;
+  gap: 30px;
   max-width: 1200px;
-  margin: 0 auto 30px;
+  margin: 0 auto 40px;
   grid-template-columns: 1fr 1fr;
 }
 
-.profile-card {
-  background: rgba(255, 255, 255, 0.95);
-  border: 2px solid #666;
-  border-radius: 20px;
-  padding: 24px;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+.profile-card,
+.info-card,
+.history-item {
+  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid #ddd; /* Bordure discrète */
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08); /* Ombre légère */
 }
 
-.profile-card h2 {
+.profile-card h2,
+.history-date {
   margin-top: 0;
-  margin-bottom: 18px;
+  margin-bottom: 20px;
   color: rgb(148, 193, 30);
+  font-size: 1.6rem;
 }
 
 .friends-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 14px;
 }
 
 .friend-chip {
-  padding: 12px 16px;
-  border-radius: 14px;
+  padding: 14px 18px;
+  border-radius: 12px;
   border: 1px solid rgb(148, 193, 30);
   background: white;
   min-width: 140px;
+  transition: all 0.2s ease;
+}
+
+.friend-chip:hover {
+  background: #f0f7eb; /* Survol doux */
 }
 
 .friend-name {
   display: block;
-  font-weight: 700;
+  font-weight: 600;
   color: #222;
 }
 
 .friend-meta {
   display: block;
-  margin-top: 4px;
-  font-size: 0.85rem;
-  color: #666;
-}
-
-.info-card {
-  background: rgba(255, 255, 255, 0.95);
-  border: 2px solid #666;
-  border-radius: 20px;
-  padding: 24px;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
-  max-width: 1200px;
-  margin: 0 auto 30px;
+  margin-top: 6px;
+  font-size: 0.9rem;
+  color: #777;
 }
 
 .info-header {
@@ -93,35 +94,36 @@
   align-items: flex-start;
   gap: 20px;
   flex-wrap: wrap;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
 .info-subtitle {
-  margin: 8px 0 0;
-  color: #444;
+  margin: 10px 0 0;
+  color: #666;
 }
 
 .edit-button {
-  background: rgb(148, 193, 30);
+  background: #7ba05b;
   color: #fff;
-  padding: 10px 18px;
+  padding: 12px 20px;
   border-radius: 12px;
   border: none;
   cursor: pointer;
   font-size: 1rem;
+  transition: all 0.2s ease;
 }
 
 .edit-button:hover {
-  opacity: 0.9;
+  background: #6a8a4a;
   transform: translateY(-2px);
-  box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
 }
 
 .countdown {
-  font-size: 3rem;
-  font-weight: 800;
+  font-size: 2.8rem;
+  font-weight: 700;
   color: rgb(148, 193, 30);
-  margin-bottom: 10px;
+  margin-bottom: 14px;
 }
 
 .posts-card {
@@ -135,25 +137,18 @@
   align-items: flex-end;
   gap: 20px;
   flex-wrap: wrap;
+  margin-bottom: 16px;
 }
 
 .posts-count {
-  color: #666;
+  color: #777;
   font-size: 0.95rem;
 }
 
 .history-list {
   display: grid;
-  gap: 18px;
-  margin-top: 20px;
-}
-
-.history-item {
-  background: rgba(255, 255, 255, 0.95);
-  border: 2px solid #666;
-  border-radius: 20px;
-  padding: 20px;
-  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.1);
+  gap: 24px;
+  margin-top: 24px;
 }
 
 .history-item-head {
@@ -161,27 +156,23 @@
   justify-content: space-between;
   align-items: baseline;
   gap: 10px;
-  margin-bottom: 16px;
+  margin-bottom: 18px;
   flex-wrap: wrap;
 }
 
-.history-date {
-  font-weight: 700;
-  color: rgb(148, 193, 30);
-}
-
 .history-meta {
-  color: #666;
+  color: #777;
 }
 
 .history-description {
-  color: #333;
-  margin: 0 0 16px;
+  color: #444;
+  margin: 0 0 18px;
+  line-height: 1.6;
 }
 
 .history-photos {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   flex-wrap: wrap;
 }
 
@@ -195,30 +186,35 @@
 }
 
 p {
-  margin: 0;
+  margin: 0 0 12px;
+  line-height: 1.6;
 }
 
 button {
   font-family: "myFont2", cursive;
-  font-size: 1.2em;
+  font-size: 1.1em;
   background-color: white;
-  color: rgb(148, 193, 30);
-  border: none;
+  color: #7ba05b;
+  border: 1px solid #7ba05b;
   border-radius: 10px;
   padding: 12px 24px;
   margin: 10px;
   cursor: pointer;
-  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
-  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
 }
 
 button:hover {
+  background: #f0f7eb;
   transform: translateY(-2px);
-  box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
 }
 
 @media (max-width: 900px) {
   .profile-grid {
     grid-template-columns: 1fr;
+  }
+  .profile-header h1 {
+    font-size: 2.2rem;
   }
 }

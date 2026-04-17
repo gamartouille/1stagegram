@@ -21,7 +21,7 @@
         placeholder="Rechercher un pseudo..."
         @keyup.enter="searchUser"
       />
-      <button @click="searchUser">🔍 Rechercher</button>
+      <button @click="searchUser">Rechercher des amis</button>
     </div>
 
     <!-- Résultats de la recherche -->

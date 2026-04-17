@@ -26,7 +26,12 @@
       <section class="profile-card friends-card">
         <h2>Ami avec...</h2>
         <div v-if="friends.length" class="friends-list">
-          <div class="friend-chip" v-for="friend in friends" :key="friend.id">
+          <div
+            class="friend-chip"
+            v-for="friend in friends"
+            :key="friend.id"
+            @click="friend.observateur ? goToFriendProfileObservateur(friend.id) : goToFriendProfile(friend.id)"
+          >
             <span class="friend-name">{{ friend.pseudo }}</span>
             <span class="friend-meta">{{ friend.titre || 'Aucun titre' }}</span>
           </div>
@@ -175,6 +180,15 @@ async function fetchProfileData() {
     }))
   }
 }
+
+function goToFriendProfile(friendId) {
+  router.push({ name: 'ProfilPublic', params: { id: friendId } });
+}
+
+function goToFriendProfileObservateur(friendId) {
+  router.push({ name: 'ProfilObservateur', params: { id: friendId } });
+}
+
 
 function goToEditInfo() {
   router.push({ name: 'Information', query: { from: 'edit' } })

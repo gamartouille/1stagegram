@@ -14,10 +14,15 @@
     <section class="profile-card info-card">
       <h2>Liste d'amis</h2>
       <div v-if="friends.length" class="friends-list">
-        <div class="friend-chip" v-for="friend in friends" :key="friend.id">
-          <span class="friend-name">{{ friend.pseudo }}</span>
-          <span class="friend-meta">{{ friend.titre || 'Aucun titre' }}</span>
-        </div>
+        <div
+            class="friend-chip"
+            v-for="friend in friends"
+            :key="friend.id"
+            @click="friend.observateur ? goToFriendProfileObservateur(friend.id) : goToFriendProfile(friend.id)"
+          >
+            <span class="friend-name">{{ friend.pseudo }}</span>
+            <span class="friend-meta">{{ friend.titre || 'Aucun titre' }}</span>
+          </div>
       </div>
       <p v-else>Pas encore d'amis</p>
     </section>
@@ -177,6 +182,14 @@ async function declineFriend(requestId) {
   }
 
   await fetchPendingRequests()
+}
+
+function goToFriendProfileObservateur(friendId) {
+  router.push({ name: 'ProfilObservateur', params: { id: friendId } });
+}
+
+function goToFriendProfile(friendId) {
+  router.push({ name: 'ProfilPublic', params: { id: friendId } });
 }
 
 onMounted(fetchObservateurProfile)
