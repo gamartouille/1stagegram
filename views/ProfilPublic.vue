@@ -237,8 +237,8 @@ async function fetchCurrentUserFriends() {
 
 async function sendFriendRequest(amiId) {
   if (!currentUserId) {
-    alert('Vous devez être connecté pour ajouter un ami.')
-    return
+    alert('Vous devez être connecté pour ajouter un ami.');
+    return;
   }
 
   const { data: existing1 } = await supabase
@@ -268,9 +268,9 @@ async function sendFriendRequest(amiId) {
     })
 
   if (error) {
-    console.error('Erreur lors de l'envoi de la demande d’ami :', error)
-    alert('Impossible d’envoyer la demande pour le moment.')
-    return
+    console.error("Erreur lors de l'envoi de la demande d’ami :", error)
+    alert('Impossible d’envoyer la demande pour le moment.');
+    return;
   }
 
   alert('Demande d’ami envoyée !')

@@ -182,12 +182,12 @@ async function sendFriendRequest(amiId) {
     })
 
   if (error) {
-    console.error('Erreur lors de l'envoi de la demande d’ami :', error)
+    console.error("Erreur lors de l'envoi de la demande d’ami :", error)
     alert('Impossible d’envoyer la demande pour le moment.');
     return;
   }
 
-  alert('Demande d’ami envoyée !')
+  alert('Demande d’ami envoyée !');
 }
 
 async function handleFriendClick(friend) {
