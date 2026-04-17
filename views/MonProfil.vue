@@ -8,6 +8,9 @@
     <div class="profile-header">
       <h1>Mon profil</h1>
       <p class="subtitle">Bienvenue, {{ userPseudo || 'utilisateur' }}</p>
+      <router-link :to="{ name: 'Amis' }">
+        <button class="add-friends-button">Ajouter des amis</button>
+      </router-link>
     </div>
 
     <section class="profile-card info-card">
@@ -16,7 +19,7 @@
           <h2>{{ titre || 'non précisé' }}</h2>
           <p class="info-subtitle">Je fais mon stage à : <strong>{{ ville || 'non précisée' }}</strong></p>
         </div>
-        <button class="edit-button" @click="goToEditInfo">Éditer</button>
+        <button class="edit-button" @click="goToEditInfo">Editer</button>
       </div>
       <p>Je travaille pour : <strong>{{ institut || 'non précisé' }}</strong></p>
       <p>Mon sujet est : <strong>{{ sujet || 'non précisé' }}</strong></p>
@@ -43,6 +46,10 @@
       <section class="profile-card countdown-card">
         <h2>Temps restant</h2>
         <div v-if="daysRemaining !== null">
+          <div class="stage-dates">
+            <span class="date-arrivee">Arrivee : {{ formatDate(stageStartDate) }}</span>
+            <span class="date-retour">Retour : {{ formatDate(stageEndDate) }}</span>
+          </div>
           <div class="countdown">{{ daysRemaining >= 0 ? daysRemaining : 0 }}</div>
           <p>{{ daysRemaining >= 0 ? 'jours restants avant la fin du stage' : 'Stage terminé' }}</p>
         </div>
@@ -98,6 +105,7 @@ const titre = ref('')
 const bio = ref('')
 const friends = ref([])
 const posts = ref([])
+const stageStartDate = ref(null)
 const stageEndDate = ref(null)
 const pendingRequests = ref([])
 
@@ -136,12 +144,13 @@ async function fetchProfileData() {
   // Profil
   const { data: session } = await supabase
     .from('sessions')
-    .select('pseudo, date_retour, ville, institut, sujet, titre, bio')
+    .select('pseudo, date_debut, date_retour, ville, institut, sujet, titre, bio')
     .eq('id', playerId)
     .single()
 
   if (session) {
     userPseudo.value = session.pseudo
+    stageStartDate.value = session.date_debut
     stageEndDate.value = session.date_retour
     ville.value = session.ville || ''
     institut.value = session.institut || ''

@@ -30,7 +30,7 @@
             class="friend-chip"
             v-for="friend in friends"
             :key="friend.id"
-            @click="friend.observateur ? goToFriendProfileObservateur(friend.id) : goToFriendProfile(friend.id)"
+            @click="handleFriendClick(friend)"
           >
             <span class="friend-name">{{ friend.pseudo }}</span>
             <span class="friend-meta">{{ friend.titre || 'Aucun titre' }}</span>
@@ -42,6 +42,10 @@
       <section class="profile-card countdown-card">
         <h2>Temps restant</h2>
         <div v-if="daysRemaining !== null">
+          <div class="stage-dates">
+            <span class="date-arrivee">Arrivee : {{ formatDate(stageStartDate) }}</span>
+            <span class="date-retour">Retour : {{ formatDate(stageEndDate) }}</span>
+          </div>
           <div class="countdown">{{ daysRemaining >= 0 ? daysRemaining : 0 }}</div>
           <p>{{ daysRemaining >= 0 ? 'jours restants avant la fin de son stage' : 'Stage terminé' }}</p>
         </div>
@@ -80,6 +84,8 @@ import { supabase } from '../supabase.js'
 
 const route = useRoute()
 const router = useRouter()
+const userId = route.params.id
+const currentUserId = localStorage.getItem('playerId')
 const userPseudo = ref('')
 const ville = ref('')
 const institut = ref('')
@@ -88,9 +94,11 @@ const titre = ref('')
 const bio = ref('')
 const friends = ref([])
 const posts = ref([])
+const stageStartDate = ref(null)
 const stageEndDate = ref(null)
+const currentUserFriendIds = ref([])
 const isObserver = ref(false)
-const isOwnProfile = computed(() => route.params.id === localStorage.getItem('playerId'))
+const isOwnProfile = computed(() => userId === currentUserId)
 
 const daysRemaining = computed(() => {
   if (!stageEndDate.value) return null
@@ -149,6 +157,7 @@ async function fetchProfileData() {
 
   if (!sessionError && session) {
     userPseudo.value = session.pseudo
+    stageStartDate.value = session.date_debut
     stageEndDate.value = session.date_retour
     ville.value = session.ville || ''
     institut.value = session.institut || ''
@@ -157,14 +166,36 @@ async function fetchProfileData() {
     bio.value = session.bio || ''
   }
 
-  const { data: friendData, error: friendError } = await supabase
-    .from('sessions')
-    .select('id, pseudo, titre')
-    .neq('id', userId)
-    .limit(8)
+  const { data: amis1 } = await supabase
+    .from('amis')
+    .select('ami_id')
+    .eq('user_id', userId)
+    .eq('statut', 'accepté')
 
-  if (!friendError && friendData) {
-    friends.value = friendData
+  const { data: amis2 } = await supabase
+    .from('amis')
+    .select('user_id')
+    .eq('ami_id', userId)
+    .eq('statut', 'accepté')
+
+  const friendIds = [
+    ...(amis1 || []).map((rel) => rel.ami_id),
+    ...(amis2 || []).map((rel) => rel.user_id)
+  ]
+
+  if (friendIds.length > 0) {
+    const { data: friendData, error: friendError } = await supabase
+      .from('sessions')
+      .select('id, pseudo, titre, observateur')
+      .in('id', friendIds)
+
+    if (!friendError && friendData) {
+      friends.value = friendData
+    } else {
+      friends.value = []
+    }
+  } else {
+    friends.value = []
   }
 
   const { data: postData, error: postError } = await supabase
@@ -181,20 +212,108 @@ async function fetchProfileData() {
   }
 }
 
+async function fetchCurrentUserFriends() {
+  if (!currentUserId) return
+
+  const { data: amis1 } = await supabase
+    .from('amis')
+    .select('ami_id')
+    .eq('user_id', currentUserId)
+    .eq('statut', 'accepté')
+
+  const { data: amis2 } = await supabase
+    .from('amis')
+    .select('user_id')
+    .eq('ami_id', currentUserId)
+    .eq('statut', 'accepté')
+
+  const friendIds = [
+    ...(amis1 || []).map((a) => String(a.ami_id)),
+    ...(amis2 || []).map((a) => String(a.user_id))
+  ]
+
+  currentUserFriendIds.value = friendIds
+}
+
+async function sendFriendRequest(amiId) {
+  if (!currentUserId) {
+    alert('Vous devez être connecté pour ajouter un ami.')
+    return
+  }
+
+  const { data: existing1 } = await supabase
+    .from('amis')
+    .select('id')
+    .eq('user_id', currentUserId)
+    .eq('ami_id', amiId)
+
+  const { data: existing2 } = await supabase
+    .from('amis')
+    .select('id')
+    .eq('user_id', amiId)
+    .eq('ami_id', currentUserId)
+
+  if ((existing1 && existing1.length > 0) || (existing2 && existing2.length > 0)) {
+    alert('Une relation existe déjà avec cet utilisateur.')
+    return
+  }
+
+  const { error } = await supabase
+    .from('amis')
+    .insert({
+      user_id: currentUserId,
+      ami_id: amiId,
+      statut: 'en_attente',
+      date_creation: new Date().toISOString()
+    })
+
+  if (error) {
+    console.error('Erreur lors de l'envoi de la demande d’ami :', error)
+    alert('Impossible d’envoyer la demande pour le moment.')
+    return
+  }
+
+  alert('Demande d’ami envoyée !')
+}
+
 function goToFriendProfile(friendId) {
-  router.push({ name: 'ProfilPublic', params: { id: friendId } });
+  router.push({ name: 'ProfilPublic', params: { id: friendId } })
 }
 
 function goToFriendProfileObservateur(friendId) {
-  router.push({ name: 'ProfilObservateur', params: { id: friendId } });
+  router.push({ name: 'ProfilObservateur', params: { id: friendId } })
 }
 
+async function handleFriendClick(friend) {
+  if (isOwnProfile.value) {
+    return friend.observateur ? goToFriendProfileObservateur(friend.id) : goToFriendProfile(friend.id)
+  }
+
+  if (!currentUserId) {
+    alert('Vous devez être connecté pour ajouter un ami.')
+    return
+  }
+
+  const isFriend = currentUserFriendIds.value.includes(String(friend.id))
+
+  if (isFriend) {
+    return friend.observateur ? goToFriendProfileObservateur(friend.id) : goToFriendProfile(friend.id)
+  }
+
+  const confirmation = confirm(`Tu n'es pas ami avec ${friend.pseudo}. Veux-tu lui envoyer une demande d'ami ?`)
+  if (!confirmation) return
+
+  await sendFriendRequest(friend.id)
+}
 
 function goToEditInfo() {
   router.push({ name: 'Information', query: { from: 'edit' } })
 }
 
-onMounted(fetchProfileData)
+onMounted(async () => {
+  await fetchCurrentUserFriends()
+  await fetchProfileData()
+})
 </script>
 
 <style src="./MonProfil.css" scoped></style>

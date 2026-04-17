@@ -9,6 +9,7 @@ const routes = [
   { path: '/carte', name: 'Carte', component: () => import('../views/Carte.vue') },
   { path: '/post', name: 'Post', component: () => import('../views/Post.vue') },
   { path: '/monprofil', name: 'MonProfil', component: () => import('../views/MonProfil.vue') },
+  { path: '/amis', name: 'Amis', component: () => import('../views/Amis.vue') },
   { path: '/profil-public/:id', name: 'ProfilPublic', component: () => import('../views/ProfilPublic.vue') },
   { path: '/profil-observateur/:id', name: 'ProfilObservateur', component: () => import('../views/ProfilObservateur.vue') }
 ]
