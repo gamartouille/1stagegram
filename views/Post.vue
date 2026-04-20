@@ -4,7 +4,6 @@
       <router-link :to="{ name: isObserver ? 'AccueilObservateur' : 'Accueil' }">
         <button class="btn btn-secondary">Accueil</button>
       </router-link>
-      <button @click="refreshPage" class="refresh-button">🔄 Actualiser</button>
     </div>
 
     <div class="post-container">

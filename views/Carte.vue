@@ -3,7 +3,6 @@
     <router-link :to="{ name: isObserver ? 'AccueilObservateur' : 'Accueil' }">
       <button>Accueil</button>
     </router-link>
-    <button @click="refreshPage" class="refresh-button">🔄 Actualiser</button>
   </div>
   <div id="map" style="width: 100%; height: 100vh;"></div>
 </template>
