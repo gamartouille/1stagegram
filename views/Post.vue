@@ -20,6 +20,7 @@
               v-model="caption"
               placeholder="Dis nous tout..."
               required
+              style="font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
             ></textarea>
           </div>
 
