@@ -270,7 +270,7 @@ function goToEditInfo() {
 }
 
 function refreshPage() {
-  location.reload()
+  fetchProfileData()
 }
 
 async function acceptFriend(amiRelationId) {
@@ -362,7 +362,14 @@ async function deletePost(postId) {
   }
 }
 
-onMounted(fetchProfileData)
+onMounted(async () => {
+  const playerId = localStorage.getItem('playerId')
+  if (!playerId) {
+    router.push({ name: 'Home' })
+    return
+  }
+  await fetchProfileData()
+})
 </script>
 
 <style src="./MonProfil.css" scoped></style>

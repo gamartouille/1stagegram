@@ -37,16 +37,28 @@ export default {
       }
     }
 
-    onMounted(checkObserverStatus);
+    onMounted(async () => {
+      const playerId = localStorage.getItem('playerId');
+      if (!playerId) {
+        window.location.href = '/';
+        return;
+      }
+      await checkObserverStatus();
+    });
 
-    const refreshPage = () => {
+    const refreshPage = async () => {
+      const playerId = localStorage.getItem('playerId');
+      if (!playerId) {
+        window.location.href = '/';
+        return;
+      }
       location.reload();
     };
 
     return { isObserver, refreshPage };
   },
+
   async mounted() {
-    // Fix icônes Leaflet
     delete L.Icon.Default.prototype._getIconUrl;
     L.Icon.Default.mergeOptions({
       iconRetinaUrl:
@@ -65,10 +77,9 @@ export default {
         '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
     }).addTo(map);
 
-    // 🔥 Requête Supabase (inchangée sauf si ta table/colonnes ont changé)
     const { data, error } = await supabase
-      .from("sessions") // ⚠️ change ici si ta table a changé
-      .select("ville, pseudo") // ⚠️ adapte si colonnes différentes
+      .from("sessions")
+      .select("ville, pseudo")
       .not("ville", "is", null);
 
     if (error) {
@@ -85,16 +96,11 @@ export default {
       villesMap[row.ville].push(row.pseudo);
     });
 
-    // 🔥 Géocodage + affichage
     for (const ville in villesMap) {
       try {
         const response = await fetch(
-          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
-            ville
-          )}&format=json&limit=1`,
-          {
-            headers: { "Accept-Language": "fr" },
-          }
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(ville)}&format=json&limit=1`,
+          { headers: { "Accept-Language": "fr" } }
         );
 
         const results = await response.json();
@@ -111,13 +117,13 @@ export default {
           })
             .addTo(map)
             .bindTooltip(
-                `<strong>${ville}</strong><br>${pseudos.join(", ")}`,
-                {
-                  permanent: false, // La tooltip disparaît quand on ne survole plus
-                  direction: "auto", // La tooltip s'affiche intelligemment autour du curseur
-                  sticky: true, // La tooltip reste visible tant que le curseur est sur l'élément
-                }
-              );
+              `<strong>${ville}</strong><br>${pseudos.join(", ")}`,
+              {
+                permanent: false,
+                direction: "auto",
+                sticky: true,
+              }
+            );
         } else {
           console.warn(`Ville introuvable : ${ville}`);
         }
