@@ -4,6 +4,7 @@
       <router-link :to="{ name: 'Accueil' }">
         <button>Accueil</button>
       </router-link>
+      <button @click="refreshPage" class="refresh-button">🔄 Actualiser</button>
     </div>
     <div class="profile-header">
       <h1>Mon profil</h1>
@@ -266,6 +267,10 @@ function goToFriendProfile(friendId) {
 
 function goToEditInfo() {
   router.push({ name: 'Information', query: { from: 'edit' } })
+}
+
+function refreshPage() {
+  location.reload()
 }
 
 async function acceptFriend(amiRelationId) {

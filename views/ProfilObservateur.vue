@@ -4,6 +4,7 @@
       <router-link :to="{ name: isOwnProfile && isObserver ? 'AccueilObservateur' : 'Accueil' }">
         <button>Accueil</button>
       </router-link>
+      <button @click="refreshPage" class="refresh-button">🔄 Actualiser</button>
     </div>
 
     <div class="profile-header">

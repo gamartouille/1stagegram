@@ -8,6 +8,7 @@
     <router-link v-if="playerId" :to="{ name: 'ProfilObservateur', params: { id: playerId } }">
       <button>Mon profil</button>
     </router-link>
+    <button @click="refreshPage" class="refresh-button">🔄 Actualiser</button>
     <button @click="logout" class="logout-button">Deconnexion</button>
 
     <!-- Barre de recherche de profils -->
@@ -238,6 +239,10 @@ export default {
     logout() {
       localStorage.removeItem('playerId')
       this.$router.push({ name: 'Home' })
+    },
+
+    refreshPage() {
+      location.reload()
     },
 
     async addFriend(amiId) {

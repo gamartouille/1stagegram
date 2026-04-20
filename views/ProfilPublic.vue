@@ -4,6 +4,7 @@
     <router-link :to="{ name: isObserver ? 'AccueilObservateur' : 'Accueil' }">
       <button>Accueil</button>
     </router-link>
+    <button @click="refreshPage" class="refresh-button">🔄 Actualiser</button>
     </div>
     <div class="profile-header">
       <h1 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 5em;">{{ titre || 'non précisé' }}</h1>
@@ -318,6 +319,10 @@ async function handleFriendClick(friend) {
 
 function goToEditInfo() {
   router.push({ name: 'Information', query: { from: 'edit' } })
+}
+
+function refreshPage() {
+  location.reload()
 }
 
 onMounted(async () => {

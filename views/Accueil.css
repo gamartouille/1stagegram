@@ -348,3 +348,23 @@ button:hover {
     transform: translateY(0px) rotate(0deg);
   }
 }
+
+.refresh-button {
+  background-color: rgb(148, 193, 30);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  margin: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: "myFont2", cursive;
+  font-size: 1em;
+  font-weight: 600;
+}
+
+.refresh-button:hover {
+  background-color: rgb(128, 173, 10);
+  transform: translateY(-2px);
+  box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.4);
+}

@@ -4,6 +4,7 @@
       <router-link :to="{ name: isObserver ? 'AccueilObservateur' : 'Accueil' }">
         <button>Accueil</button>
       </router-link>
+      <button @click="refreshPage" class="refresh-button">🔄 Actualiser</button>
     </div>
 
     <div class="page-header">
@@ -192,6 +193,10 @@ async function addFriend(amiId) {
   // Mettre à jour le statut localement
   friendshipStatus.value[amiId] = 'en_attente'
   alert('Demande d\'ami envoyée avec succès !')
+}
+
+function refreshPage() {
+  location.reload()
 }
 
 onMounted(fetchUsers)

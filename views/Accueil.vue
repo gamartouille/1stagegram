@@ -12,6 +12,7 @@
         <span v-if="pendingFriendRequestsCount > 0" class="notification-badge">{{ pendingFriendRequestsCount }}</span>
       </button>
     </router-link>
+    <button @click="refreshPage" class="refresh-button">🔄 Actualiser</button>
     <button @click="logout" class="logout-button">Deconnexion</button>
 
     <!-- Barre de recherche de profils -->
@@ -203,6 +204,10 @@ export default {
     logout() {
       localStorage.removeItem('playerId');
       this.$router.push({ name: 'Home' });
+    },
+
+    refreshPage() {
+      location.reload();
     },
 
     toggleCommentForm(postId) {
