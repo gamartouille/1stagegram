@@ -192,7 +192,12 @@ async function sendFriendRequest(amiId) {
 
 async function handleFriendClick(friend) {
   if (friend.id === currentUserId) {
-    router.push({ name: 'MonProfil' })
+    // Si c'est son propre profil, rediriger selon le type d'utilisateur
+    if (isObserver.value) {
+      router.push({ name: 'ProfilObservateur', params: { id: currentUserId } })
+    } else {
+      router.push({ name: 'MonProfil' })
+    }
     return
   }
 

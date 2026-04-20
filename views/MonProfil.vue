@@ -16,13 +16,13 @@
     <section class="profile-card info-card">
       <div class="info-header">
         <div>
-          <h2>{{ titre || 'non précisé' }}</h2>
-          <p class="info-subtitle">Je fais mon stage à : <strong>{{ ville || 'non précisée' }}</strong></p>
+          <h2>{{ titre || 'non precise' }}</h2>
+          <p class="info-subtitle">Je fais mon stage a : <strong>{{ ville || 'non precisee' }}</strong></p>
         </div>
         <button class="edit-button" @click="goToEditInfo">Editer</button>
       </div>
-      <p>Je travaille pour : <strong>{{ institut || 'non précisé' }}</strong></p>
-      <p>Mon sujet est : <strong>{{ sujet || 'non précisé' }}</strong></p>
+      <p>Je travaille pour : <strong>{{ institut || 'non precise' }}</strong></p>
+      <p>Mon sujet est : <strong>{{ sujet || 'non precise' }}</strong></p>
       <p>{{ bio}}</p>
     </section>
 
@@ -51,9 +51,9 @@
             <span class="date-retour">Retour : {{ formatDate(stageEndDate) }}</span>
           </div>
           <div class="countdown">{{ daysRemaining >= 0 ? daysRemaining : 0 }}</div>
-          <p>{{ daysRemaining >= 0 ? 'jours restants avant la fin du stage' : 'Stage terminé' }}</p>
+          <p>{{ daysRemaining >= 0 ? 'jours restants avant la fin du stage' : 'Stage termine' }}</p>
         </div>
-        <p v-else>Ajoute les dates de ton stage pour voir le décompte.</p>
+        <p v-else>Ajoute les dates de ton stage pour voir le decompte.</p>
       </section>
     </div>
 
@@ -78,6 +78,7 @@
           <div class="history-item-head">
             <span class="history-date">Post #{{ post.id }}</span>
             <span class="history-meta">{{ formatDate(post.created_at || post.date_creation) }}</span>
+            <button class="edit-post-btn" @click="editPost(post)">✏️ Modifier</button>
           </div>
           <p class="history-description">{{ post.description || 'Aucune description' }}</p>
           <div v-if="post.photos.length" class="history-photos">
@@ -86,8 +87,21 @@
         </article>
       </div>
 
-      <p v-else>Tu n'as pas encore publié de post.</p>
+      <p v-else>Tu n'as pas encore publie de post.</p>
     </section>
+
+    <!-- Modal d'édition de post -->
+    <div v-if="editingPost" class="modal-overlay" @click.self="closeEditModal">
+      <div class="modal-content">
+        <h3>Modifier le post</h3>
+        <label>Description :</label>
+        <textarea v-model="editDescription" placeholder="Description du post"></textarea>
+        <label>Photos (URLs separees par des virgules) :</label>
+        <textarea v-model="editPhotos" placeholder="URLs des photos"></textarea>
+        <button @click="savePostEdit">Enregistrer</button>
+        <button @click="closeEditModal">Annuler</button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -108,6 +122,9 @@ const posts = ref([])
 const stageStartDate = ref(null)
 const stageEndDate = ref(null)
 const pendingRequests = ref([])
+const editingPost = ref(null)
+const editDescription = ref('')
+const editPhotos = ref('')
 
 const daysRemaining = computed(() => {
   if (!stageEndDate.value) return null
@@ -276,6 +293,41 @@ async function declineFriend(amiRelationId) {
     console.error('Erreur lors du refus :', error)
     alert("Erreur : " + error.message)
   } else {
+    await fetchProfileData()
+  }
+}
+
+function editPost(post) {
+  editingPost.value = post
+  editDescription.value = post.description || ''
+  editPhotos.value = Array.isArray(post.photos) ? post.photos.join(', ') : post.photos || ''
+}
+
+function closeEditModal() {
+  editingPost.value = null
+  editDescription.value = ''
+  editPhotos.value = ''
+}
+
+async function savePostEdit() {
+  if (!editingPost.value) return
+
+  const photosArray = editPhotos.value.split(',').map(p => p.trim()).filter(p => p)
+
+  const { error } = await supabase
+    .from('posts')
+    .update({
+      description: editDescription.value,
+      photos: photosArray.length > 0 ? photosArray.join(',') : null
+    })
+    .eq('id', editingPost.value.id)
+
+  if (error) {
+    console.error('Erreur lors de la modification du post :', error)
+    alert('Erreur lors de la modification du post.')
+  } else {
+    alert('Post modifié avec succès !')
+    closeEditModal()
     await fetchProfileData()
   }
 }

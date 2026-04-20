@@ -26,6 +26,7 @@
         <router-link v-if="user.isAcceptedFriend" :to="{ name: user.observateur ? 'ProfilObservateur' : 'ProfilPublic', params: { id: user.id } }">
           <button class="profile-btn">👤 Voir le profil</button>
         </router-link>
+        
         <button v-else @click="addFriend(user.id)">Ajouter en ami</button>
       </div>
     </div>
@@ -33,24 +34,31 @@
     <div class="posts-container">
       <div v-for="post in posts" :key="post.id" class="post">
         <div class="post-header">
-          <p class="post-author">Posté par : <strong>{{ post.pseudo || 'Inconnu' }}</strong></p>
+          <p class="post-author">Poste par : <strong>{{ post.pseudo || 'Inconnu' }}</strong></p>
           <p class="post-date">{{ formatDate(post.date) }}</p>
         </div>
-        <div class="post-content">
-          <div class="post-photos">
-            <img
-              v-for="(photo, index) in normalizePhotos(post.photos)"
-              :key="index"
-              :src="photo"
-              alt="Photo du post"
-              class="photo-img"
-            />
-          </div>
-          <div class="post-text">
-            <p class="post-description">{{ post.description }}</p>
-            <router-link :to="{ name: post.authorObservateur ? 'ProfilObservateur' : 'ProfilPublic', params: { id: post.session_id } }">
-              <button class="profile-btn">👤 Voir le profil</button>
-            </router-link>
+        <div class="post-photos">
+          <img
+            v-for="(photo, index) in normalizePhotos(post.photos)"
+            :key="index"
+            :src="photo"
+            alt="Photo du post"
+            class="photo-img"
+          />
+        </div>
+        <p class="post-description">{{ post.description }}</p>
+        <div class="post-buttons">
+          <router-link :to="{ name: post.authorObservateur ? 'ProfilObservateur' : 'ProfilPublic', params: { id: post.session_id } }">
+            <button class="profile-btn">👤 Voir le profil</button>
+          </router-link>
+          <button @click="toggleCommentForm(post.id)" class="add-comment-btn">💬 Ajouter un commentaire</button>
+        </div>
+        <div v-if="commentForms[post.id]" class="modal-overlay" @click.self="toggleCommentForm(post.id)">
+          <div class="modal-content">
+            <h3>Ajouter un commentaire</h3>
+            <textarea v-model="newComments[post.id]" placeholder="Votre commentaire"></textarea>
+            <button @click="addComment(post.id)">Envoyer</button>
+            <button @click="toggleCommentForm(post.id)">Annuler</button>
           </div>
         </div>
         <div class="post-comments" v-if="post.commentaires && post.commentaires.length">
@@ -73,7 +81,9 @@ export default {
       userPseudo: '',
       searchPseudo: '',
       searchResults: [],
-      playerId: ''
+      playerId: '',
+      commentForms: {},
+      newComments: {}
     }
   },
   async mounted() {
@@ -125,6 +135,21 @@ export default {
           .from('commentaires')
           .select('*')
           .eq('post_id', post.id)
+          .order('date_creation', { ascending: true })
+
+        // Récupérer les pseudos des auteurs des commentaires
+        const authorIds = comments ? comments.map(c => c.auteur).filter(id => id) : []
+        const { data: authors } = await supabase
+          .from('sessions')
+          .select('id, pseudo')
+          .in('id', authorIds)
+        
+        console.log("IDs des auteurs des commentaires :", authorIds);
+
+        const commentsWithAuthors = comments ? comments.map(comment => ({
+          ...comment,
+          auteur: comment.auteur || 'Inconnu'
+        })) : []
 
         const { data: author } = await supabase
           .from('sessions')
@@ -136,7 +161,7 @@ export default {
           ...post,
           pseudo: author?.pseudo || 'Inconnu',
           authorObservateur: author?.observateur || false,
-          commentaires: comments || []
+          commentaires: commentsWithAuthors
         }
       }))
     },
@@ -287,6 +312,45 @@ export default {
       }
 
       return { accepted: false, pending: false, outgoing: false }
+    },
+
+    toggleCommentForm(postId) {
+      this.commentForms[postId] = !this.commentForms[postId]
+      if (!this.commentForms[postId]) {
+        this.newComments[postId] = ''
+      }
+    },
+
+    async addComment(postId) {
+      const playerId = localStorage.getItem('playerId')
+      if (!playerId) {
+        alert('Vous devez être connecté pour commenter.')
+        return
+      }
+
+      const commentContent = this.newComments[postId]?.trim()
+      if (!commentContent) {
+        alert('Le commentaire ne peut pas être vide.')
+        return
+      }
+
+      const { error } = await supabase
+        .from('commentaires')
+        .insert({
+          post_id: postId,
+          auteur: this.userPseudo,
+          contenu: commentContent,
+          date_creation: new Date().toISOString()
+        })
+
+      if (error) {
+        console.error('Erreur lors de l\'ajout du commentaire :', error)
+        alert('Erreur lors de l\'ajout du commentaire.')
+      } else {
+        this.newComments[postId] = ''
+        this.commentForms[postId] = false
+        await this.fetchPosts() // Recharger les posts pour afficher le nouveau commentaire
+      }
     }
   }
 }

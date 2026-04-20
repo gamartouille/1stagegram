@@ -132,8 +132,9 @@ button:hover {
 }
 
 .post-description{
-  font-family: "myFont2", cursive;
+  font-size :x-large;
   color:#666;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .post {
@@ -145,17 +146,11 @@ button:hover {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.post-content {
-  display: flex;
-  gap: 20px;
-  align-items: flex-start;
-}
-
 .post-photos {
-  flex: 1;
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
+  margin: 15px 0;
 }
 
 .photo-img {
@@ -166,13 +161,21 @@ button:hover {
   border-radius: 10px;
 }
 
-.post-text {
-  flex: 1;
+.post-description {
+  color: #666;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 15px 0;
   text-align: left;
 }
 
+.post-buttons {
+  display: flex;
+  gap: 10px;
+  margin: 15px 0;
+  justify-content: flex-start;
+}
+
 .add-comment-btn {
-  margin-top: 10px;
   font-size: 0.8em;
   background-color: #f0f0f0;
   border: 1px solid #ccc;
@@ -191,7 +194,6 @@ button:hover {
   border: 1px solid #ccc;
   border-radius: 5px;
   padding: 5px;
-  font-family: "myFont2", cursive;
 }
 
 .comment-form button {
@@ -216,6 +218,7 @@ button:hover {
   border-radius: 10px;
   margin: 5px 0;
   color: #333;
+  font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .modal-overlay {
