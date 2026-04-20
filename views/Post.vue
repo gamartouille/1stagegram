@@ -9,7 +9,6 @@
     <div class="post-container">
       <div class="post-header">
         <h2>Poster des nouvelles</h2>
-        <p class="subtitle">Partage tes expériences de stage avec la communauté</p>
       </div>
 
       <form @submit.prevent="uploadMedias">
@@ -19,7 +18,7 @@
             <textarea
               id="caption"
               v-model="caption"
-              placeholder="Dis nous tout sur ton expérience..."
+              placeholder="Dis nous tout..."
               required
             ></textarea>
           </div>
@@ -34,9 +33,9 @@
           </div>
 
           <div class="form-group">
-            <label>Médias (images ou vidéos)</label>
+            <label>Medias (images ou videos)</label>
             <button type="button" @click="triggerFileInput" class="btn btn-secondary">
-              📎 Importer des médias
+              Importer des medias
             </button>
             <input
               type="file"
@@ -58,13 +57,13 @@
             class="btn btn-primary"
             :disabled="selectedFiles.length === 0 || !caption.trim()"
           >
-            📤 Publier le post
+            Publier le post
           </button>
         </div>
       </form>
 
       <div v-if="selectedFiles.length > 0" class="preview-section">
-        <h3>🖼️ Aperçu des médias</h3>
+        <h3 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">Aperçu des médias (ça rend pas pareil après publication)</h3>
         <div class="media-grid">
           <div
             v-for="(file, index) in selectedFiles"

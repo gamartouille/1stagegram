@@ -24,7 +24,7 @@
             @click="handleFriendClick(friend)"
           >
             <span class="friend-name">{{ friend.pseudo }}</span>
-            <span class="friend-meta">{{ friend.titre || 'Aucun titre' }}</span>
+            <span class="friend-meta" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">{{ friend.titre || 'Aucun titre' }}</span>
           </div>
       </div>
       <p v-else>Pas encore d'amis</p>

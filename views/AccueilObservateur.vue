@@ -12,12 +12,17 @@
 
     <!-- Barre de recherche de profils -->
     <div class="search-bar">
-      <input
-        v-model="searchPseudo"
-        placeholder="Rechercher un pseudo..."
-        @keyup.enter="searchUser"
-      />
-      <button @click="searchUser">🔍 Rechercher</button>
+      <div class="search-section">
+        <input
+          v-model="searchPseudo"
+          placeholder="Rechercher un pseudo..."
+          @keyup.enter="searchUser"
+        />
+        <button @click="searchUser">Rechercher des amis</button>
+      </div>
+      <router-link :to="{ name: 'Amis' }">
+        <button class="add-friends-button">Ajouter des amis</button>
+      </router-link>
     </div>
 
     <div v-if="searchResults.length" class="search-results">

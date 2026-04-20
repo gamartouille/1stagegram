@@ -16,14 +16,14 @@
     <section class="profile-card info-card">
       <div class="info-header">
         <div>
-          <h2>{{ titre || 'non precise' }}</h2>
-          <p class="info-subtitle">Je fais mon stage a : <strong>{{ ville || 'non precisee' }}</strong></p>
+          <h2 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">{{ titre || 'non precise' }}</h2>
+          <p class="info-subtitle">Je fais mon stage a : <strong style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">{{ ville || 'non precisee' }}</strong></p>
         </div>
         <button class="edit-button" @click="goToEditInfo">Editer</button>
       </div>
-      <p>Je travaille pour : <strong>{{ institut || 'non precise' }}</strong></p>
-      <p>Mon sujet est : <strong>{{ sujet || 'non precise' }}</strong></p>
-      <p>{{ bio}}</p>
+      <p>Je travaille pour : <strong style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">{{ institut || 'non precise' }}</strong></p>
+      <p>Mon sujet est : <strong style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">{{ sujet || 'non precise' }}</strong></p>
+      <p style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">{{ bio}}</p>
     </section>
 
     <div class="profile-grid">
@@ -37,7 +37,9 @@
             @click="friend.observateur ? goToFriendProfileObservateur(friend.id) : goToFriendProfile(friend.id)"
           >
             <span class="friend-name">{{ friend.pseudo }}</span>
-            <span class="friend-meta">{{ friend.titre || 'Aucun titre' }}</span>
+            <span class="friend-meta" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+              {{ friend.titre || 'Aucun titre' }}
+            </span>
           </div>
         </div>
         <p v-else>Tu n'as pas encore d'amis dans ta liste.</p>
@@ -62,8 +64,8 @@
       <h2>Demandes d'amis en attente</h2>
       <div v-for="req in pendingRequests" :key="req.id" class="friend-request">
         <span>{{ req.senderPseudo }}</span>
-        <button @click="acceptFriend(req.id)">✅ Accepter</button>
-        <button @click="declineFriend(req.id)">❌ Refuser</button>
+        <button @click="acceptFriend(req.id)">Accepter</button>
+        <button @click="declineFriend(req.id)">Refuser</button>
       </div>
     </section>
 
@@ -77,10 +79,15 @@
         <article class="history-item" v-for="post in posts" :key="post.id">
           <div class="history-item-head">
             <span class="history-date">Post #{{ post.id }}</span>
-            <span class="history-meta">{{ formatDate(post.created_at || post.date_creation) }}</span>
-            <button class="edit-post-btn" @click="editPost(post)">✏️ Modifier</button>
+            <span class="history-meta">{{ formatDate(post.created_at || post.date) }}</span>
+            <div class="post-actions">
+              <button class="edit-post-btn" @click="editPost(post)">Modifier</button>
+              <button class="delete-post-btn" @click="deletePost(post.id)">Supprimer</button>
+            </div>
           </div>
-          <p class="history-description">{{ post.description || 'Aucune description' }}</p>
+          <p class="history-description" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+            {{ post.description || 'Aucune description' }}
+          </p>
           <div v-if="post.photos.length" class="history-photos">
             <img v-for="(photo, index) in post.photos" :key="index" :src="photo" alt="Photo du post" />
           </div>
@@ -328,6 +335,24 @@ async function savePostEdit() {
   } else {
     alert('Post modifié avec succès !')
     closeEditModal()
+    await fetchProfileData()
+  }
+}
+
+async function deletePost(postId) {
+  const confirmation = confirm('Êtes-vous sûr de vouloir supprimer ce post ? Cette action est irréversible.')
+  if (!confirmation) return
+
+  const { error } = await supabase
+    .from('posts')
+    .delete()
+    .eq('id', postId)
+
+  if (error) {
+    console.error('Erreur lors de la suppression du post :', error)
+    alert('Erreur lors de la suppression du post.')
+  } else {
+    alert('Post supprimé avec succès !')
     await fetchProfileData()
   }
 }

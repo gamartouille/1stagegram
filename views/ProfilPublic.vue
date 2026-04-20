@@ -6,20 +6,20 @@
     </router-link>
     </div>
     <div class="profile-header">
-      <h1>{{ titre || 'non précisé' }}</h1>
+      <h1 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 5em;">{{ titre || 'non précisé' }}</h1>
       <p class="subtitle">{{ userPseudo || 'utilisateur' }}</p>
     </div>
 
     <section class="profile-card info-card">
       <div class="info-header">
         <div>
-          <p class="info-subtitle">{{ isOwnProfile ? 'Je fais mon stage à :' : 'Fait son stage à :' }} <strong>{{ ville || 'non précisée' }}</strong></p>
+          <p class="info-subtitle">{{ isOwnProfile ? 'Je fais mon stage à :' : 'Fait son stage a :' }} <strong style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">{{ ville || 'non précisée' }}</strong></p>
         </div>
         <button v-if="isOwnProfile" class="edit-button" @click="goToEditInfo">Éditer</button>
       </div>
-      <p>{{ isOwnProfile ? 'Je travaille pour :' : 'Travaille pour :' }} <strong>{{ institut || 'non précisé' }}</strong></p>
-      <p>{{ isOwnProfile ? 'Mon sujet est :' : 'Son sujet est :' }} <strong>{{ sujet || 'non précisé' }}</strong></p>
-      <p>{{ bio}}</p>    
+      <p>{{ isOwnProfile ? 'Je travaille pour :' : 'Travaille pour :' }} <strong style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">{{ institut || 'non précisé' }}</strong></p>
+      <p>{{ isOwnProfile ? 'Mon sujet est :' : 'Son sujet est :' }} <strong style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">{{ sujet || 'non précisé' }}</strong></p>
+      <p style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">{{ bio}}</p>    
     </section>
 
     <div class="profile-grid">
@@ -33,7 +33,7 @@
             @click="handleFriendClick(friend)"
           >
             <span class="friend-name">{{ friend.pseudo }}</span>
-            <span class="friend-meta">{{ friend.titre || 'Aucun titre' }}</span>
+            <span class="friend-meta" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">{{ friend.titre || 'Aucun titre' }}</span>
           </div>
         </div>
         <p v-else>Aucun ami</p>
@@ -63,9 +63,9 @@
         <article class="history-item" v-for="post in posts" :key="post.id">
           <div class="history-item-head">
             <span class="history-date">Post #{{ post.id }}</span>
-            <span class="history-meta">{{ formatDate(post.created_at || post.date_creation) }}</span>
+            <span class="history-meta">{{ formatDate(post.created_at || post.date) }}</span>
           </div>
-          <p class="history-description">{{ post.description || 'Aucune description' }}</p>
+          <p class="history-description" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">{{ post.description || 'Aucune description' }}</p>
           <div v-if="post.photos.length" class="history-photos">
             <img v-for="(photo, index) in post.photos" :key="index" :src="photo" alt="Photo du post" />
           </div>

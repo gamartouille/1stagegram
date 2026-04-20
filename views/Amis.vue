@@ -31,9 +31,9 @@
             <h3>{{ user.pseudo }}</h3>
             <span v-if="user.observateur" class="observer-badge">Observateur</span>
           </div>
-          <p class="user-bio">{{ user.bio || 'Aucune bio' }}</p>
+          <p class="user-bio" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">{{ user.bio || 'Aucune bio' }}</p>
           <div class="user-details">
-            <span v-if="user.titre" class="user-title">{{ user.titre }}</span>
+            <span v-if="user.titre" class="user-title" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">{{ user.titre }}</span>
             <span v-if="user.ville" class="user-city">📍 {{ user.ville }}</span>
           </div>
         </div>
