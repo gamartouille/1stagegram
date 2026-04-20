@@ -135,8 +135,13 @@ export default {
     
   },
   async mounted() {
-    await this.fetchPosts();
+    const playerId = localStorage.getItem('playerId');
+    if (!playerId) {
+      this.$router.push({ name: 'Home' });
+      return;
+    }
     await this.fetchUserPseudo();
+    await this.fetchPosts();
     await this.fetchPendingFriendRequestsCount();
   },
   methods: {
@@ -262,8 +267,10 @@ nextPhoto() {
       this.$router.push({ name: 'Home' });
     },
 
-    refreshPage() {
-      location.reload();
+    async refreshPage() {
+      await this.fetchPosts();
+      await this.fetchUserPseudo();
+      await this.fetchPendingFriendRequestsCount();
     },
 
     toggleCommentForm(postId) {

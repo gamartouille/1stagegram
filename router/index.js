@@ -21,14 +21,11 @@ const router = createRouter({
 })
 
 // Garde de navigation pour vérifier l'authentification
-router.beforeEach(async (to, from, next) => {
+router.beforeEach((to, from, next) => {
+  const publicRoutes = ['Home', 'Login'] // adapte selon tes noms de routes
   const playerId = localStorage.getItem('playerId')
-  const { data: { session } } = await supabase.auth.getSession()
   
-  const isAuthenticated = playerId !== null && session !== null
-  
-  if (to.meta.requiresAuth && !isAuthenticated) {
-    // Rediriger vers la page d'accueil (login) si non authentifié
+  if (!publicRoutes.includes(to.name) && !playerId) {
     next({ name: 'Home' })
   } else {
     next()
