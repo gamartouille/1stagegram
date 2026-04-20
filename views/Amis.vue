@@ -44,28 +44,28 @@
             class="friend-button accepted"
             disabled
           >
-            ✅ Ami
+            Deja ami
           </button>
           <button
             v-else-if="friendshipStatus[user.id] === 'pending'"
             class="friend-button pending"
             disabled
           >
-            ⏳ En attente
+            En attente...
           </button>
           <button
             v-else
             class="friend-button add"
             @click="addFriend(user.id)"
           >
-            ➕ Ajouter
+            Ajouter
           </button>
         </div>
       </div>
     </div>
 
     <div v-if="filteredUsers.length === 0" class="no-results">
-      <p>Aucun utilisateur trouvé</p>
+      <p>Aucun utilisateur trouve</p>
     </div>
   </div>
 </template>

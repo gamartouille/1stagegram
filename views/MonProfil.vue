@@ -16,13 +16,13 @@
     <section class="profile-card info-card">
       <div class="info-header">
         <div>
-          <h2 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">{{ titre || 'non precise' }}</h2>
-          <p class="info-subtitle">Je fais mon stage a : <strong style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">{{ ville || 'non precisee' }}</strong></p>
+          <h2 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">{{ titre }}</h2>
+          <p class="info-subtitle">Je fais mon stage a : <strong style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">{{ ville || 'Non précisée' }}</strong></p>
         </div>
         <button class="edit-button" @click="goToEditInfo">Editer</button>
       </div>
-      <p>Je travaille pour : <strong style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">{{ institut || 'non precise' }}</strong></p>
-      <p>Mon sujet est : <strong style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">{{ sujet || 'non precise' }}</strong></p>
+      <p>Je travaille pour : <strong style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">{{ institut || 'Non précisé' }}</strong></p>
+      <p>Mon sujet est : <strong style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">{{ sujet || 'Non précisé' }}</strong></p>
       <p style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">{{ bio}}</p>
     </section>
 
