@@ -51,7 +51,30 @@
         </div>
         <div class="post-content">
           <div class="post-photos">
-            <img v-for="(photo, index) in normalizePhotos(post.photos)" :key="index" :src="photo" alt="Photo du post" class="photo-img" />
+            <template v-if="normalizePhotos(post.photos).length <= 3">
+              <img
+                v-for="(photo, index) in normalizePhotos(post.photos)"
+                :key="index"
+                :src="photo"
+                alt="Photo du post"
+                class="photo-img"
+                @click="openLightbox(post.id, index)"
+              />
+            </template>
+            <template v-else>
+              <img
+                v-for="(photo, index) in normalizePhotos(post.photos).slice(0, 2)"
+                :key="index"
+                :src="photo"
+                alt="Photo du post"
+                class="photo-img"
+                @click="openLightbox(post.id, index)"
+              />
+              <div class="more-photos" @click="openLightbox(post.id, 2)">
+                <img :src="normalizePhotos(post.photos)[2]" alt="Plus de photos" class="photo-img blurred" />
+                <span>+{{ normalizePhotos(post.photos).length - 2 }} photos</span>
+              </div>
+            </template>
           </div>
           <div class="post-text">
             <p class="post-description">{{ post.description }}</p>
@@ -76,6 +99,14 @@
         </div>
       </div>
     </div>
+    <!-- Lightbox -->
+    <div v-if="lightbox.open" class="lightbox-overlay" @click.self="closeLightbox">
+      <button class="lightbox-close" @click="closeLightbox">✕</button>
+      <button class="lightbox-prev" @click="prevPhoto" v-if="lightbox.photos.length > 1">‹</button>
+      <img :src="lightbox.photos[lightbox.index]" class="lightbox-img" />
+      <button class="lightbox-next" @click="nextPhoto" v-if="lightbox.photos.length > 1">›</button>
+      <p class="lightbox-counter">{{ lightbox.index + 1 }} / {{ lightbox.photos.length }}</p>
+    </div>
   </div>
 </template>
 
@@ -95,8 +126,13 @@ export default {
       userPseudo: '',
       searchPseudo: '',
       searchResults: [],
-      pendingFriendRequestsCount: 0
+      pendingFriendRequestsCount: 0,lightbox: {
+      open: false,
+      photos: [],
+      index: 0
+    },
     };
+    
   },
   async mounted() {
     await this.fetchPosts();
@@ -200,7 +236,27 @@ export default {
         this.pendingFriendRequestsCount = data.length;
       }
     },
+    openLightbox(postId, index) {
+  const post = this.posts.find(p => p.id === postId)
+  if (!post) return
+  this.lightbox = {
+    open: true,
+    photos: this.normalizePhotos(post.photos),
+    index
+  }
+},
 
+closeLightbox() {
+  this.lightbox.open = false
+},
+
+prevPhoto() {
+  this.lightbox.index = (this.lightbox.index - 1 + this.lightbox.photos.length) % this.lightbox.photos.length
+},
+
+nextPhoto() {
+  this.lightbox.index = (this.lightbox.index + 1) % this.lightbox.photos.length
+},
     logout() {
       localStorage.removeItem('playerId');
       this.$router.push({ name: 'Home' });
