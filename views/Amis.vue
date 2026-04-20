@@ -196,10 +196,17 @@ async function addFriend(amiId) {
 }
 
 function refreshPage() {
-  location.reload()
+  fetchUsers()
 }
 
-onMounted(fetchUsers)
+onMounted(async () => {
+  if (!currentUserId) {
+    router.push({ name: 'Home' })
+    return
+  }
+  await fetchUsers()
+})
+
 </script>
 
 <style scoped>

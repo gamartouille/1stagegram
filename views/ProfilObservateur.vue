@@ -290,11 +290,21 @@ function goToFriendProfileObservateur(friendId) {
 function goToFriendProfile(friendId) {
   router.push({ name: 'ProfilPublic', params: { id: friendId } });
 }
+function refreshPage() {
+  fetchCurrentUserFriends()
+  fetchProfileData()
+}
 
 onMounted(async () => {
+  const playerId = localStorage.getItem('playerId')
+  if (!playerId) {
+    router.push({ name: 'Home' })
+    return
+  }
   await fetchCurrentUserFriends()
   await fetchObservateurProfile()
 })
+
 </script>
 
 <style src="./MonProfil.css" scoped></style>

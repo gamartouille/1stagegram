@@ -93,9 +93,14 @@ export default {
     }
   },
   async mounted() {
-    this.playerId = localStorage.getItem('playerId') || ''
-    await this.fetchUserPseudo()  
-    await this.fetchPosts()       
+    const playerId = localStorage.getItem('playerId');
+    if (!playerId) {
+      this.$router.push({ name: 'Home' });
+      return;
+    }
+    await this.fetchUserPseudo();
+    await this.fetchPosts();
+    await this.fetchPendingFriendRequestsCount();
   },
   methods: {
     async fetchPosts() {

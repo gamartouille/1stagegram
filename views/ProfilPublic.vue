@@ -322,13 +322,20 @@ function goToEditInfo() {
 }
 
 function refreshPage() {
-  location.reload()
+  fetchCurrentUserFriends()
+  fetchProfileData()
 }
 
 onMounted(async () => {
+  const playerId = localStorage.getItem('playerId')
+  if (!playerId) {
+    router.push({ name: 'Home' })
+    return
+  }
   await fetchCurrentUserFriends()
   await fetchProfileData()
 })
+
 </script>
 
 <style src="./MonProfil.css" scoped></style>
