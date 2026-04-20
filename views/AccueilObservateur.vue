@@ -93,8 +93,8 @@ export default {
   },
   async mounted() {
     this.playerId = localStorage.getItem('playerId') || ''
-    await this.fetchPosts()
-    await this.fetchUserPseudo()
+    await this.fetchUserPseudo()  
+    await this.fetchPosts()       
   },
   methods: {
     async fetchPosts() {
