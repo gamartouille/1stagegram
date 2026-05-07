@@ -13,6 +13,7 @@
       <router-link v-if="isOwnProfile" :to="{ name: 'Amis' }">
         <button class="add-friends-button">Ajouter des amis</button>
       </router-link>
+      <button @click="toNormal" class="refresh-button">Passer en compte normal</button>
     </div>
 
     <section class="profile-card info-card">
@@ -294,6 +295,11 @@ function refreshPage() {
   fetchCurrentUserFriends()
   fetchProfileData()
 }
+
+function toNormal() {
+  router.push({ name: 'MonProfil' })
+}
+
 
 onMounted(async () => {
   const playerId = localStorage.getItem('playerId')

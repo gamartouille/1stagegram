@@ -34,7 +34,7 @@
           </div>
 
           <div class="form-group">
-            <label>Medias (images ou videos)</label>
+            <label>Medias (images uniquement)</label>
             <button type="button" @click="triggerFileInput" class="btn btn-secondary">
               Importer des medias
             </button>
