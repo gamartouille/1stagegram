@@ -1,7 +1,7 @@
 # PROJET
 
 1stagegram est un projet personnel éphémère à destination des élèves de Géodata Paris (ex-ENSG Géomatique). En fin d'année, toutes les promotions se séparent pour partir en stage dans divers endroits, en France et autour du monde.
-Pour garder le contact et donner des nouvelles régulièrement à ses camarades d'école, j'ai choisi de développer un site sur le modèle des anciens réseaux sociaux, permettant de poster des photos avec une légende, et de réagir aux publications des autres utilisateurs.
+Pour garder le contact et donner des nouvelles régulièrement à ses camarades d'école, ce site, développé sur le modèle des anciens réseaux sociaux, permet de poster des photos avec une légende, et de réagir aux publications des autres utilisateurs.
 
 # ASPECTS TECHNIQUES
 
